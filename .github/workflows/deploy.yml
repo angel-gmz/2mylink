@@ -1,0 +1,62 @@
+# Nombre del workflow
+name: Deploy to Hostinger
+
+# Se activa en cada push a la rama 'main'
+on:
+  push:
+    branches:
+      - main
+
+# Define los trabajos a ejecutar
+jobs:
+  deploy:
+    # Usa una máquina virtual de Ubuntu para ejecutar los pasos
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Clona tu repositorio en la máquina virtual
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Configura el entorno de PHP (ajusta la versión a la de tu Hostinger)
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2' # ¡Importante! Usa la misma versión de PHP que tu plan de Hostinger
+
+      # 3. Instala las dependencias de Laravel (sin las de desarrollo)
+      - name: Install Composer Dependencies
+        run: composer install --no-interaction --no-dev --prefer-dist --optimize-autoloader
+
+      # 4. Configura Node.js para compilar los assets
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # O la versión que uses
+
+      # 5. Instala las dependencias de NPM y compila los archivos
+      - name: Install NPM Dependencies and Build
+        run: |
+          npm install
+          npm run build
+
+      # 6. Despliega los archivos al servidor usando SFTP
+      - name: Deploy files via SFTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.HOSTINGER_HOST }}
+          username: ${{ secrets.HOSTINGER_USER }}
+          password: ${{ secrets.HOSTINGER_PASS }}
+          port: ${{ secrets.HOSTINGER_PORT }}
+          protocol: sftp # Especifica el uso de SFTP
+          # Carpeta en el servidor donde se subirán los archivos.
+          # Asegúrate de que esta sea la ruta correcta de tu proyecto en Hostinger.
+          server-dir: public_html/
+          # Excluye archivos y carpetas que no quieres subir
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            .env
+            .env.example
+            README.md
