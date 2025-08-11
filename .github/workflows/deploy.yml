@@ -50,7 +50,7 @@ jobs:
           password: ${{ secrets.HOSTINGER_PASS }}
           port: ${{ secrets.HOSTINGER_PORT }} # <-- Debe ser 21
           # No especificamos protocolo, ya que FTP es el default
-          server-dir: public_html/
+          server-dir: .
           exclude: |
             **/.git*
             **/.git*/**
