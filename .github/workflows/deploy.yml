@@ -18,21 +18,21 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. Configura el entorno de PHP (ajusta la versión a la de tu Hostinger)
+      # 2. Configura el entorno de PHP
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2' # ¡Importante! Usa la misma versión de PHP que tu plan de Hostinger
+          php-version: '8.2'
 
-      # 3. Instala las dependencias de Laravel (sin las de desarrollo)
+      # 3. Instala las dependencias de Laravel
       - name: Install Composer Dependencies
         run: composer install --no-interaction --no-dev --prefer-dist --optimize-autoloader
 
-      # 4. Configura Node.js para compilar los assets
+      # 4. Configura Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20' # O la versión que uses
+          node-version: '20'
 
       # 5. Instala las dependencias de NPM y compila los archivos
       - name: Install NPM Dependencies and Build
@@ -40,23 +40,18 @@ jobs:
           npm install
           npm run build
 
-      # 6. Despliega los archivos al servidor usando SFTP
-      - name: Deploy files via SFTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+      # 6. Despliega los archivos usando el Action de FTP
+      - name: Deploy files via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4 # <-- Volvemos a este Action
         with:
+          # Usamos tus secrets, pero asegúrate de que coincidan con la captura
           server: ${{ secrets.HOSTINGER_HOST }}
           username: ${{ secrets.HOSTINGER_USER }}
           password: ${{ secrets.HOSTINGER_PASS }}
-          port: ${{ secrets.HOSTINGER_PORT }}
-          protocol: sftp # Especifica el uso de SFTP
-          # Carpeta en el servidor donde se subirán los archivos.
-          # Asegúrate de que esta sea la ruta correcta de tu proyecto en Hostinger.
+          port: ${{ secrets.HOSTINGER_PORT }} # <-- Debe ser 21
+          # No especificamos protocolo, ya que FTP es el default
           server-dir: public_html/
-          # Excluye archivos y carpetas que no quieres subir
           exclude: |
             **/.git*
             **/.git*/**
             **/node_modules/**
-            .env
-            .env.example
-            README.md
