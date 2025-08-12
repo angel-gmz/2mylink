@@ -18,11 +18,11 @@ type RegisterForm = {
     password_confirmation: string;
 };
 
-export default function Register() {
+export default function Register({ prefilledUsername }: { prefilledUsername?: string }) {
     // 2. Añade 'username' a los datos del formulario
     const { data, setData, post, processing, errors, reset } = useForm<Required<RegisterForm>>({
         name: '',
-        username: '',
+        username: prefilledUsername || '',
         email: '',
         password: '',
         password_confirmation: '',
