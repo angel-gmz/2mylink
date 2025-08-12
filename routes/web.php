@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LinkController; 
 use Inertia\Inertia;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
 
 Route::get('/', function () {
     return Inertia::render('welcome');
@@ -29,6 +30,12 @@ Route::middleware('auth')->group(function () {
 });
 
 require __DIR__.'/settings.php';
+
+Route::get('/rtdavbfbgij12345', function () {
+    Artisan::call('migrate', ['--force' => true]);
+    return '¡Migraciones ejecutadas!';
+});
+
 require __DIR__.'/auth.php';
 
 Route::get('/{user:username}', [\App\Http\Controllers\PublicProfileController::class, 'show'])->name('profile.show');
