@@ -51,6 +51,7 @@ require __DIR__.'/settings.php';
 
 // Temporary route for running migrations in production.
 // IMPORTANT: REMOVE THIS ROUTE AFTER YOU HAVE USED IT.
+/*
 Route::get('/rtdavbfbgij12345', function () {
     Artisan::call('migrate', ['--force' => true]);
     return 'Migrations executed successfully!';
@@ -67,6 +68,7 @@ Route::get('/rtdasadsgij1234sb', function () {
 
     return '¡Enlace simbólico creado!';
 });
+*/
 
 Route::get('/visit/{link}', [LinkClickController::class, '__invoke'])->name('links.visit');
 

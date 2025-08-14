@@ -1,6 +1,6 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type Link as LinkType, type PageProps, type User } from '@/types';
-import { Head, Link as InertiaLink, router, useForm } from '@inertiajs/react';
+import { Head, router, useForm } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 
 import { DndContext, closestCenter, DragEndEvent } from '@dnd-kit/core';
@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { BarChart2, Copy, Check } from 'lucide-react';
+import { Copy, Check } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -148,40 +148,13 @@ export default function Dashboard({ auth, links: initialLinks }: PageProps<{ lin
                             <SortableContext items={links.map((link) => link.id)} strategy={verticalListSortingStrategy}>
                                 {links.length > 0 ? (
                                     links.map((link) => (
-                                        <SortableLinkItem key={link.id} id={link.id}>
-                                            <div className="flex w-full items-center justify-between rounded-lg border bg-background p-3">
-                                                <div>
-                                                    <p className="font-medium">{link.title}</p>
-                                                    <a
-                                                        href={link.url}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="text-sm text-muted-foreground hover:underline"
-                                                    >
-                                                        {link.url}
-                                                    </a>
-                                                </div>
-                                                <div className="flex items-center gap-4">
-                                                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                                                        <BarChart2 size={16} />
-                                                        <span>{link.clicks}</span>
-                                                    </div>
-                                                    <div className="flex items-center gap-2">
-                                                        <Button variant="outline" size="sm" onClick={() => setEditingLink(link)}>
-                                                            Edit
-                                                        </Button>
-                                                        <InertiaLink
-                                                            href={route('links.destroy', link.id)}
-                                                            method="delete"
-                                                            as="button"
-                                                            className="inline-flex h-9 items-center justify-center whitespace-nowrap rounded-md bg-destructive px-3 text-sm font-medium text-destructive-foreground ring-offset-background transition-colors hover:bg-destructive/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
-                                                        >
-                                                            Delete
-                                                        </InertiaLink>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </SortableLinkItem>
+                                        // --- THIS IS THE CORRECTED SECTION ---
+                                        // Pass the link and onEdit function as props directly
+                                        <SortableLinkItem
+                                            key={link.id}
+                                            link={link}
+                                            onEdit={() => setEditingLink(link)}
+                                        />
                                     ))
                                 ) : (
                                     <p className="text-muted-foreground">

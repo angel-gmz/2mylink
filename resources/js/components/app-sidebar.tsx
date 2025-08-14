@@ -4,7 +4,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem, type PageProps, type User } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, Coffee, ExternalLink, LayoutGrid } from 'lucide-react';
+import { BookOpen, Coffee, Cog, ExternalLink, LayoutGrid } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -12,6 +12,11 @@ const mainNavItems: NavItem[] = [
         title: 'Dashboard',
         href: '/dashboard',
         icon: LayoutGrid,
+    },
+    {
+        title: 'Settings',
+        href: '/settings/profile',
+        icon: Cog,
     },
 ];
 

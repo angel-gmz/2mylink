@@ -1,4 +1,4 @@
-import { Head } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import { type Link as LinkType } from '@/types';
 import { cn } from '@/lib/utils';
 
@@ -81,9 +81,13 @@ export default function Show({ user, links }: ShowProps) {
                         </a>
                     ))}
                 </div>
-
                 <footer className="mt-12 text-center text-sm text-muted-foreground">
-                    <p>Powered by 2myLink</p>
+                    <p>
+                        Powered by{' '}
+                        <Link href={route('home')} className="hover:underline font-semibold">
+                            2myLink
+                        </Link>
+                    </p>
                 </footer>
             </div>
         </>
