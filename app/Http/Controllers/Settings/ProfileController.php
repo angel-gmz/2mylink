@@ -29,7 +29,16 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
+        // Rellena los campos básicos como 'name' y 'email'
         $request->user()->fill($request->validated());
+
+        // --- CORRECCIÓN: Asigna la biografía explícitamente ---
+        $request->user()->bio = $request->input('bio');
+
+        if ($request->hasFile('avatar')) {
+            $path = $request->file('avatar')->store('avatars', 'public');
+            $request->user()->avatar_path = $path;
+        }
 
         if ($request->user()->isDirty('email')) {
             $request->user()->email_verified_at = null;
@@ -39,7 +48,6 @@ class ProfileController extends Controller
 
         return to_route('profile.edit');
     }
-
     /**
      * Delete the user's account.
      */

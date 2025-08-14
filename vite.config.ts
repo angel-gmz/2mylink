@@ -5,6 +5,18 @@ import { resolve } from 'node:path';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
+    server: {
+        hmr: {
+            host: 'localhost',
+        },
+        // Redirige las peticiones de /storage al backend de Laravel
+        proxy: {
+            '/storage': {
+                target: 'http://127.0.0.1:8000', // La URL de tu servidor Laravel
+                changeOrigin: true,
+            },
+        },
+    },
     plugins: [
         laravel({
             input: ['resources/css/app.css', 'resources/js/app.tsx'],

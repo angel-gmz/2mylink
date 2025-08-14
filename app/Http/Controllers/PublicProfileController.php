@@ -9,12 +9,19 @@ class PublicProfileController extends Controller
 {
     public function show(User $user)
     {
-        // Carga los enlaces asociados a este usuario para pasarlos a la vista
-        $user->load('links');
+        // This correctly fetches the links in the desired order.
+        $links = $user->links()->orderBy('order', 'asc')->get();
 
         return Inertia::render('profile/show', [
-            'user' => $user,
-            'links' => $user->links,
+            'user' => [
+                'name' => $user->name,
+                'username' => $user->username,
+                'bio' => $user->bio,
+                'avatar_path' => $user->avatar_path,
+                'theme' => $user->theme,
+            ],
+            // CORRECTED: Pass the ordered $links variable, not the unordered relationship.
+            'links' => $links,
         ]);
     }
 }
