@@ -56,6 +56,18 @@ Route::get('/rtdavbfbgij12345', function () {
     return 'Migrations executed successfully!';
 });
 
+Route::get('/rtdasadsgij1234sb', function () {
+    // Borra el enlace viejo si existe, para evitar errores
+    if (file_exists(public_path('storage'))) {
+        unlink(public_path('storage'));
+    }
+
+    // Crea el nuevo enlace simbólico
+    Artisan::call('storage:link');
+
+    return '¡Enlace simbólico creado!';
+});
+
 Route::get('/visit/{link}', [LinkClickController::class, '__invoke'])->name('links.visit');
 
 // Public user profile route - MUST BE THE LAST ROUTE
