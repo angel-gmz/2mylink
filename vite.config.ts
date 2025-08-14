@@ -12,7 +12,7 @@ export default defineConfig({
         // Redirige las peticiones de /storage al backend de Laravel
         proxy: {
             '/storage': {
-                target: 'http://127.0.0.1:8000', // La URL de tu servidor Laravel
+                target: 'http://127.0.0.1:8001', // La URL de tu servidor Laravel
                 changeOrigin: true,
             },
         },

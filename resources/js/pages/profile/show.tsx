@@ -68,9 +68,9 @@ export default function Show({ user, links }: ShowProps) {
                     {links.map((link) => (
                         <a
                             key={link.id}
-                            href={link.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
+                            // The href now points to our tracking route
+                            href={route('links.visit', link.id)}
+                            // We no longer need target="_blank" as the redirect handles opening the link
                             className={cn(
                                 'block w-full text-center font-bold py-4 px-4 rounded-lg shadow-md transition-all duration-300 ease-in-out transform hover:-translate-y-1',
                                 currentTheme.linkBg,

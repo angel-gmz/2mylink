@@ -10,6 +10,8 @@ class Link extends Model
     protected $fillable = [
         'title',
         'url',
+        'order',
+        'clicks', 
     ];
     public function user(): BelongsTo
     {

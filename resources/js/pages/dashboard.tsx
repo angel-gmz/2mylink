@@ -1,5 +1,5 @@
 import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem, type Link as LinkType, type PageProps } from '@/types';
+import { type BreadcrumbItem, type Link as LinkType, type PageProps, type User } from '@/types';
 import { Head, Link as InertiaLink, router, useForm } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 
@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { BarChart2, Copy, Check } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -20,17 +21,34 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function Dashboard({ auth, links: initialLinks }: PageProps<{ links: LinkType[] }>) {
+type LinkWithClicks = LinkType & { clicks: number };
+
+// Ensure the User type includes the username for this page
+interface DashboardUser extends User {
+    username: string;
+}
+
+export default function Dashboard({ auth, links: initialLinks }: PageProps<{ links: LinkWithClicks[]; auth: { user: DashboardUser } }>) {
     const { data, setData, post, processing, errors, reset } = useForm({
         title: '',
         url: '',
     });
 
-    const [editingLink, setEditingLink] = useState<LinkType | null>(null);
-    // Local state to manage link order for instant UI feedback
+    const [editingLink, setEditingLink] = useState<LinkWithClicks | null>(null);
     const [links, setLinks] = useState(initialLinks);
+    const [copied, setCopied] = useState(false);
 
-    // Sync local state if the props from Laravel change
+    const publicUrl = `https://2myl.ink/${auth.user.username}`;
+
+    const copyToClipboard = () => {
+        navigator.clipboard.writeText(publicUrl).then(() => {
+            setCopied(true);
+            setTimeout(() => {
+                setCopied(false);
+            }, 2000); // Reset after 2 seconds
+        });
+    };
+
     useEffect(() => {
         setLinks(initialLinks);
     }, [initialLinks]);
@@ -44,15 +62,11 @@ export default function Dashboard({ auth, links: initialLinks }: PageProps<{ lin
 
     function handleDragEnd(event: DragEndEvent) {
         const { active, over } = event;
-
         if (over && active.id !== over.id) {
             const oldIndex = links.findIndex((link) => link.id === active.id);
             const newIndex = links.findIndex((link) => link.id === over.id);
-
             const reorderedLinks = arrayMove(links, oldIndex, newIndex);
-            setLinks(reorderedLinks); // Update UI immediately
-
-            // Send the new order to the backend
+            setLinks(reorderedLinks);
             const linkIds = reorderedLinks.map((link) => link.id);
             router.patch(route('links.order.update'), { links: linkIds }, { preserveScroll: true });
         }
@@ -65,6 +79,30 @@ export default function Dashboard({ auth, links: initialLinks }: PageProps<{ lin
             <EditLinkModal link={editingLink} isOpen={!!editingLink} onClose={() => setEditingLink(null)} />
 
             <div className="space-y-6 p-4 md:p-6">
+                {/* SHARE YOUR LINK CARD */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Share Your Link</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="mb-2 text-sm text-muted-foreground">This is your public URL. Share it anywhere!</p>
+                        <div className="flex items-center space-x-2">
+                            <Input value={publicUrl} readOnly className="flex-grow" />
+                            <Button variant="outline" onClick={copyToClipboard} className="w-[110px]">
+                                {copied ? (
+                                    <>
+                                        <Check className="mr-2 h-4 w-4" /> Copied!
+                                    </>
+                                ) : (
+                                    <>
+                                        <Copy className="mr-2 h-4 w-4" /> Copy Link
+                                    </>
+                                )}
+                            </Button>
+                        </div>
+                    </CardContent>
+                </Card>
+
                 {/* ADD NEW LINK FORM */}
                 <Card>
                     <CardHeader>
@@ -123,18 +161,24 @@ export default function Dashboard({ auth, links: initialLinks }: PageProps<{ lin
                                                         {link.url}
                                                     </a>
                                                 </div>
-                                                <div className="flex items-center gap-2">
-                                                    <Button variant="outline" size="sm" onClick={() => setEditingLink(link)}>
-                                                        Edit
-                                                    </Button>
-                                                    <InertiaLink
-                                                        href={route('links.destroy', link.id)}
-                                                        method="delete"
-                                                        as="button"
-                                                        className="inline-flex h-9 items-center justify-center whitespace-nowrap rounded-md bg-destructive px-3 text-sm font-medium text-destructive-foreground ring-offset-background transition-colors hover:bg-destructive/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
-                                                    >
-                                                        Delete
-                                                    </InertiaLink>
+                                                <div className="flex items-center gap-4">
+                                                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                                                        <BarChart2 size={16} />
+                                                        <span>{link.clicks}</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <Button variant="outline" size="sm" onClick={() => setEditingLink(link)}>
+                                                            Edit
+                                                        </Button>
+                                                        <InertiaLink
+                                                            href={route('links.destroy', link.id)}
+                                                            method="delete"
+                                                            as="button"
+                                                            className="inline-flex h-9 items-center justify-center whitespace-nowrap rounded-md bg-destructive px-3 text-sm font-medium text-destructive-foreground ring-offset-background transition-colors hover:bg-destructive/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+                                                        >
+                                                            Delete
+                                                        </InertiaLink>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </SortableLinkItem>

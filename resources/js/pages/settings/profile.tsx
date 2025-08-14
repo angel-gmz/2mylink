@@ -28,22 +28,10 @@ type ProfileForm = {
     avatar: File | null;
 };
 
-// Define a more specific type for the user object to help TypeScript
-interface ProfileUser extends User {
-    bio?: string | null;
-    avatar_path?: string | null;
-}
 
-interface ProfilePageProps extends PageProps {
-    mustVerifyEmail: boolean;
-    status?: string;
-    auth: {
-        user: ProfileUser;
-    };
-}
 
 export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: boolean; status?: string }) {
-    const { auth } = usePage<ProfilePageProps>().props;
+    const { auth } = usePage<PageProps>().props;
     const [preview, setPreview] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 

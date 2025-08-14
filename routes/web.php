@@ -3,6 +3,7 @@
 use App\Http\Controllers\LinkController;
 use App\Http\Controllers\PublicProfileController;
 use App\Http\Controllers\Settings\AppearanceController;
+use App\Http\Controllers\LinkClickController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
@@ -54,6 +55,8 @@ Route::get('/rtdavbfbgij12345', function () {
     Artisan::call('migrate', ['--force' => true]);
     return 'Migrations executed successfully!';
 });
+
+Route::get('/visit/{link}', [LinkClickController::class, '__invoke'])->name('links.visit');
 
 // Public user profile route - MUST BE THE LAST ROUTE
 Route::get('/{user:username}', [PublicProfileController::class, 'show'])->name('profile.show');
