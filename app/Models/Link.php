@@ -12,6 +12,7 @@ class Link extends Model
         'url',
         'order',
         'clicks', 
+        'type',
     ];
     public function user(): BelongsTo
     {

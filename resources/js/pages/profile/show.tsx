@@ -1,4 +1,4 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link as InertiaLink } from '@inertiajs/react';
 import { type Link as LinkType } from '@/types';
 import { cn } from '@/lib/utils';
 
@@ -9,24 +9,28 @@ const themeStyles = {
         text: 'text-gray-800 dark:text-gray-200',
         linkBg: 'bg-blue-500 hover:bg-blue-600',
         linkText: 'text-white',
+        dividerText: 'text-gray-500 dark:text-gray-400',
     },
     dark: {
         bg: 'bg-gray-900',
         text: 'text-gray-100',
         linkBg: 'bg-teal-500 hover:bg-teal-600',
         linkText: 'text-white',
+        dividerText: 'text-gray-400',
     },
     mint: {
         bg: 'bg-green-50',
         text: 'text-green-900',
         linkBg: 'bg-green-600 hover:bg-green-700',
         linkText: 'text-white',
+        dividerText: 'text-green-700',
     },
     sunset: {
         bg: 'bg-orange-100',
         text: 'text-orange-900',
         linkBg: 'bg-red-500 hover:bg-red-600',
         linkText: 'text-white',
+        dividerText: 'text-orange-700',
     },
 };
 
@@ -39,10 +43,15 @@ interface ProfileUser {
     theme: keyof typeof themeStyles | null;
 }
 
+// Create a more specific type for the items, which can be a link or a divider
+interface Item extends LinkType {
+    type: 'link' | 'divider';
+}
+
 // Define the props for the Show component explicitly
 interface ShowProps {
     user: ProfileUser;
-    links: LinkType[];
+    links: Item[]; // Use the new, more specific Item type
 }
 
 export default function Show({ user, links }: ShowProps) {
@@ -65,28 +74,37 @@ export default function Show({ user, links }: ShowProps) {
                 {user.bio && <p className="max-w-md text-center mb-8">{user.bio}</p>}
 
                 <div className="w-full max-w-md px-4 space-y-4">
-                    {links.map((link) => (
-                        <a
-                            key={link.id}
-                            // The href now points to our tracking route
-                            href={route('links.visit', link.id)}
-                            // We no longer need target="_blank" as the redirect handles opening the link
-                            className={cn(
-                                'block w-full text-center font-bold py-4 px-4 rounded-lg shadow-md transition-all duration-300 ease-in-out transform hover:-translate-y-1',
-                                currentTheme.linkBg,
-                                currentTheme.linkText,
-                            )}
-                        >
-                            {link.title}
-                        </a>
-                    ))}
+                    {links.map((item) =>
+                        item.type === 'divider' ? (
+                            // Render a Divider
+                            <div key={`divider-${item.id}`} className="pt-2">
+                                <h2 className={cn('text-center font-semibold', currentTheme.dividerText)}>
+                                    {item.title}
+                                </h2>
+                            </div>
+                        ) : (
+                            // Render a Link
+                            <a
+                                key={`link-${item.id}`}
+                                href={route('links.visit', item.id)}
+                                className={cn(
+                                    'block w-full text-center font-bold py-4 px-4 rounded-lg shadow-md transition-all duration-300 ease-in-out transform hover:-translate-y-1',
+                                    currentTheme.linkBg,
+                                    currentTheme.linkText,
+                                )}
+                            >
+                                {item.title}
+                            </a>
+                        ),
+                    )}
                 </div>
+
                 <footer className="mt-12 text-center text-sm text-muted-foreground">
                     <p>
                         Powered by{' '}
-                        <Link href={route('home')} className="hover:underline font-semibold">
+                        <InertiaLink href={route('home')} className="hover:underline font-semibold">
                             2myLink
-                        </Link>
+                        </InertiaLink>
                     </p>
                 </footer>
             </div>

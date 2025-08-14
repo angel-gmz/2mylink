@@ -13,19 +13,34 @@ class LinkController extends Controller
 {
     use AuthorizesRequests;
 
-    public function store(Request $request)
+public function store(Request $request)
     {
-        $validated = $request->validate([
-            'title' => ['required', 'string', 'max:255'],
-            'url' => ['required', 'url', 'max:255'],
+        // Validate the type first
+        $validatedType = $request->validate([
+            'type' => ['required', Rule::in(['link', 'divider'])]
         ]);
 
-        $request->user()->links()->create($validated);
+        $rules = [
+            'title' => ['required', 'string', 'max:255'],
+        ];
+
+        // Add URL validation only if it's a link
+        if ($validatedType['type'] === 'link') {
+            $rules['url'] = ['required', 'url', 'max:255'];
+        }
+
+        $validatedData = $request->validate($rules);
+
+        $request->user()->links()->create([
+            'title' => $validatedData['title'],
+            'url' => $validatedData['url'] ?? null, // Set URL to null for dividers
+            'type' => $validatedType['type'],
+        ]);
 
         return Redirect::route('dashboard');
     }
 
-    /**
+ /**
      * Update the specified link.
      */
     public function update(Request $request, Link $link)
@@ -33,24 +48,27 @@ class LinkController extends Controller
         // Autoriza la acción usando la LinkPolicy
         $this->authorize('update', $link);
 
-        $validated = $request->validate([
+        $rules = [
             'title' => ['required', 'string', 'max:255'],
-            'url' => ['required', 'url', 'max:255'],
-        ]);
+        ];
+
+        // Only validate URL if it's a link
+        if ($link->type === 'link') {
+            $rules['url'] = ['required', 'url', 'max:255'];
+        }
+
+        $validated = $request->validate($rules);
 
         $link->update($validated);
 
         return Redirect::route('dashboard');
     }
 
-    public function destroy(Link $link)
+     public function destroy(Link $link)
     {
-        // Llama a la Policy para verificar si el usuario puede borrar este enlace
         $this->authorize('delete', $link);
-
         $link->delete();
-
-        return Redirect::route('dashboard');
+        return back();
     }
 
         /**
@@ -60,18 +78,15 @@ class LinkController extends Controller
     {
         $request->validate([
             'links' => ['required', 'array'],
-            // Ensure every ID in the array exists and belongs to the authenticated user
             'links.*' => ['integer', Rule::exists('links', 'id')->where('user_id', $request->user()->id)],
         ]);
 
-        // Loop through the received link IDs and update their order based on their position in the array
         foreach ($request->links as $index => $linkId) {
             Link::where('id', $linkId)
                 ->where('user_id', $request->user()->id)
                 ->update(['order' => $index]);
         }
 
-        // We can return a 204 No Content response as we don't need to reload the page
         return back();
     }
 }
