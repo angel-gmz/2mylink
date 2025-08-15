@@ -26,7 +26,9 @@ class User extends Authenticatable
         'password',
         'avatar_path',
         'bio',        
-        'theme',      
+        'theme',    
+        'google_id', 
+        'onboarded', 
     ];
 
     /**

@@ -4,6 +4,7 @@ use App\Http\Controllers\LinkController;
 use App\Http\Controllers\PublicProfileController;
 use App\Http\Controllers\Settings\AppearanceController;
 use App\Http\Controllers\LinkClickController;
+use App\Http\Controllers\Auth\OnboardingController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
@@ -33,6 +34,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
             'links' => $request->user()->links()->orderBy('order', 'asc')->get(),
         ]);
     })->name('dashboard');
+
+    Route::get('/onboarding', [OnboardingController::class, 'create'])->name('onboarding.create');
+    Route::post('/onboarding', [OnboardingController::class, 'store'])->name('onboarding.store');
 
     // Link Management
     Route::post('links', [LinkController::class, 'store'])->name('links.store');

@@ -36,11 +36,12 @@ const PhoneMockup = () => (
 
 export default function Welcome() {
     const { auth } = usePage<SharedData>().props;
-    const { data, setData, get } = useForm({ username: '' });
+    const { data, setData } = useForm({ username: '' });
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
-        get(route('register', { username: data.username }));
+        // Use window.location.href for a full page redirect to the Google auth route
+        window.location.href = route('auth.google.redirect', { username: data.username });
     };
 
     const pageUrl = "https://2myl.ink";
