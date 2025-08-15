@@ -78,7 +78,7 @@ export default function Welcome() {
                 <header className="absolute top-0 left-0 w-full z-10 p-6">
                     <div className="container mx-auto flex items-center justify-between">
                         <Link href="/" className="flex items-center gap-3">
-                            <img src="/logo_2ml.svg" alt="2myLink Logo" className="h-8" />
+                            <img src="/logo2ml_blanco.webp" alt="2myLink Logo" className="h-8" />
                         </Link>
                         <nav className="flex items-center gap-4 text-sm font-medium">
                             {auth.user ? (
@@ -87,12 +87,13 @@ export default function Welcome() {
                                 </Link>
                             ) : (
                                 <>
-                                    <Link href={route('login')} className="px-4 py-2 hover:text-white transition-colors">
+                                    {/* Use <a> tags for full page redirect to Google Auth */}
+                                    <a href={route('auth.google.redirect')} className="px-4 py-2 hover:text-white transition-colors">
                                         Log In
-                                    </Link>
-                                    <Link href={route('register')} className="bg-white text-slate-900 px-4 py-2 rounded-md hover:bg-slate-200 transition-colors">
+                                    </a>
+                                    <a href={route('auth.google.redirect')} className="bg-white text-slate-900 px-4 py-2 rounded-md hover:bg-slate-200 transition-colors">
                                         Sign Up Free
-                                    </Link>
+                                    </a>
                                 </>
                             )}
                         </nav>
