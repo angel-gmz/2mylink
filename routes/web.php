@@ -23,7 +23,19 @@ use Inertia\Inertia;
 
 // Public landing page
 Route::get('/', function () {
-    return Inertia::render('welcome');
+    // Define los datos de SEO para la página de inicio
+    $seoData = [
+        'title' => "2myLink - The Only Link You'll Ever Need",
+        'description' => "Create a single, beautiful page to house all your important links. Perfect for your social media bios, portfolios, and connecting with your audience.",
+        'image' => asset('logo_social.png'), // Asegúrate de que esta imagen exista en tu carpeta /public
+    ];
+
+    // Comparte los datos de SEO con la plantilla raíz
+    Inertia::share('seo', $seoData);
+
+    return Inertia::render('welcome', [
+        'seo' => $seoData, // Pasa los datos también al componente de React
+    ]);
 })->name('home');
 
 // All authenticated routes
