@@ -15,12 +15,14 @@ class PublicProfileController extends Controller
             ->orderBy('order', 'asc')
             ->get();
 
-        // Prepara los datos para SEO y Open Graph
         $seoData = [
             'title' => $user->name . ' (@' . $user->username . ') | 2myLink',
             'description' => $user->bio ?: 'Encuentra todos mis enlaces en un solo lugar.',
             'image' => $user->avatar_path ? Storage::url($user->avatar_path) : asset('logo_social.png'),
         ];
+
+        // Comparte los datos de SEO con la vista de Inertia Y con la plantilla raíz
+        Inertia::share('seo', $seoData);
 
         return Inertia::render('profile/show', [
             'user' => [
@@ -29,9 +31,10 @@ class PublicProfileController extends Controller
                 'bio' => $user->bio,
                 'avatar_path' => $user->avatar_path,
                 'theme' => $user->theme,
+                'avatar_url' => $user->avatar_path ? Storage::url($user->avatar_path) : null,
             ],
             'links' => $links,
-            'seo' => $seoData, // Pasa los datos de SEO a la vista
+            'seo' => $seoData,
         ]);
     }
 }
