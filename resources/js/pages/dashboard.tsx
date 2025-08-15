@@ -1,7 +1,7 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type Link as LinkType, type PageProps, type User } from '@/types';
 import { Head, router, useForm } from '@inertiajs/react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 import { DndContext, closestCenter, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
@@ -35,16 +35,19 @@ interface DashboardUser extends User {
 
 export default function Dashboard({ auth, links: initialLinks }: PageProps<{ links: Item[]; auth: { user: DashboardUser } }>) {
     const [newItemType, setNewItemType] = useState<'link' | 'divider'>('link');
+    
+    // Inicializa el formulario con los valores por defecto
     const { data, setData, post, processing, errors, reset } = useForm({
         title: '',
-        url: '',
-        type: 'link',
+        url: '', 
+        type: 'link' as 'link' | 'divider', // Tipo explícito
     });
 
     const [editingLink, setEditingLink] = useState<Item | null>(null);
     const [links, setLinks] = useState(initialLinks);
     const [copied, setCopied] = useState(false);
     const [isQrModalOpen, setIsQrModalOpen] = useState(false);
+    const titleInputRef = useRef<HTMLInputElement>(null);
 
     const publicUrl = `https://2myl.ink/${auth.user.username}`;
 
@@ -61,8 +64,38 @@ export default function Dashboard({ auth, links: initialLinks }: PageProps<{ lin
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
+
+        // Creamos un objeto con los datos a enviar
+        const dataToSubmit = {
+            title: data.title,
+            type: data.type,
+            // Solo incluye la URL si el tipo es 'link'
+            ...(data.type === 'link' && { url: data.url })
+        };
+
+        // SOLUCIÓN AL ERROR 1: Usar la sintaxis correcta de Inertia
         post(route('links.store'), {
-            onSuccess: () => reset('title', 'url'),
+            onSuccess: () => {
+                reset(); // Resetea el formulario completamente
+                setNewItemType('link'); // Vuelve a la pestaña de links
+                
+                // Asegurar que el formulario esté completamente limpio
+                setTimeout(() => {
+                    setData({
+                        title: '',
+                        url: '',
+                        type: 'link',
+                    });
+                    
+                    if (titleInputRef.current) {
+                        titleInputRef.current.focus();
+                    }
+                }, 50); // Pequeño delay para asegurar que el reset se complete
+            },
+            preserveScroll: true,
+            onError: (errors: Record<string, string>) => {
+                console.error("Error al enviar el formulario:", errors);
+            }
         });
     };
 
@@ -80,24 +113,34 @@ export default function Dashboard({ auth, links: initialLinks }: PageProps<{ lin
 
     const handleSetNewItemType = (type: 'link' | 'divider') => {
         setNewItemType(type);
-        setData('type', type);
-        reset('title', 'url');
+        
+        // SOLUCIÓN: Resetear completamente el formulario al cambiar de pestaña
+        setData({
+            title: '',
+            url: '',
+            type: type,
+        });
+        
+        if (titleInputRef.current) {
+            titleInputRef.current.focus();
+        }
     };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Dashboard" />
 
+            {/* Modales */}
             <EditLinkModal link={editingLink} isOpen={!!editingLink} onClose={() => setEditingLink(null)} />
             <QrCodeModal
                 url={publicUrl}
                 username={auth.user.username}
                 isOpen={isQrModalOpen}
-                onClose={() => setIsQrModalOpen(false)}
+                onClose={() => setIsQrModalOpen(false)} // SOLUCIÓN AL ERROR 2: Nombre correcto
             />
 
             <div className="space-y-6 p-4 md:p-6">
-                {/* SHARE YOUR LINK CARD */}
+                {/* TARJETA PARA COMPARTIR ENLACE */}
                 <Card>
                     <CardHeader>
                         <CardTitle>Share Your Link</CardTitle>
@@ -105,7 +148,6 @@ export default function Dashboard({ auth, links: initialLinks }: PageProps<{ lin
                     <CardContent>
                         <p className="mb-2 text-sm text-muted-foreground">This is your public URL. Share it anywhere!</p>
                         <div className="flex items-center space-x-2">
-                            {/* The fix is replacing 'flex-grow' with 'flex-1' */}
                             <Input value={publicUrl} readOnly className="flex-1" />
                             <Button variant="outline" size="icon" onClick={() => setIsQrModalOpen(true)} className="shrink-0">
                                 <QrCode className="h-4 w-4" />
@@ -125,14 +167,30 @@ export default function Dashboard({ auth, links: initialLinks }: PageProps<{ lin
                     </CardContent>
                 </Card>
 
-                {/* ADD NEW ITEM FORM (LINK OR DIVIDER) */}
+                {/* FORMULARIO PARA AÑADIR NUEVOS ÍTEMS */}
                 <Card>
                     <CardHeader>
                         <div className="flex items-center border-b">
-                            <button onClick={() => handleSetNewItemType('link')} className={cn('flex items-center gap-2 px-4 py-2 font-semibold', newItemType === 'link' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground')}>
+                            <button 
+                                onClick={() => handleSetNewItemType('link')} 
+                                className={cn(
+                                    'flex items-center gap-2 px-4 py-2 font-semibold', 
+                                    newItemType === 'link' 
+                                        ? 'border-b-2 border-primary text-primary' 
+                                        : 'text-muted-foreground'
+                                )}
+                            >
                                 <Link2 size={16} /> Add Link
                             </button>
-                            <button onClick={() => handleSetNewItemType('divider')} className={cn('flex items-center gap-2 px-4 py-2 font-semibold', newItemType === 'divider' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground')}>
+                            <button 
+                                onClick={() => handleSetNewItemType('divider')} 
+                                className={cn(
+                                    'flex items-center gap-2 px-4 py-2 font-semibold', 
+                                    newItemType === 'divider' 
+                                        ? 'border-b-2 border-primary text-primary' 
+                                        : 'text-muted-foreground'
+                                )}
+                            >
                                 <Minus size={16} /> Add Divider
                             </button>
                         </div>
@@ -140,22 +198,27 @@ export default function Dashboard({ auth, links: initialLinks }: PageProps<{ lin
                     <CardContent>
                         <form onSubmit={submit} className="space-y-4">
                             <div>
-                                <Label htmlFor="title">{newItemType === 'link' ? 'Title' : 'Divider Text'}</Label>
+                                <Label htmlFor="title">
+                                    {newItemType === 'link' ? 'Title' : 'Divider Text'}
+                                </Label>
                                 <Input
                                     id="title"
+                                    ref={titleInputRef}
                                     value={data.title}
                                     onChange={(e) => setData('title', e.target.value)}
                                     placeholder={newItemType === 'link' ? 'My Portfolio' : 'e.g., Social Media'}
                                 />
                                 {errors.title && <p className="mt-1 text-sm text-red-600">{errors.title}</p>}
                             </div>
+                            
+                            {/* El campo URL solo se muestra si el tipo de ítem es 'link' */}
                             {newItemType === 'link' && (
                                 <div>
                                     <Label htmlFor="url">URL</Label>
                                     <Input
                                         id="url"
                                         type="url"
-                                        value={data.url}
+                                        value={data.url || ''}
                                         onChange={(e) => setData('url', e.target.value)}
                                         placeholder="https://..."
                                     />
@@ -169,7 +232,7 @@ export default function Dashboard({ auth, links: initialLinks }: PageProps<{ lin
                     </CardContent>
                 </Card>
 
-                {/* EXISTING ITEMS LIST (LINKS AND DIVIDERS) */}
+                {/* LISTA DE ÍTEMS EXISTENTES */}
                 <Card>
                     <CardHeader>
                         <CardTitle>My Links & Dividers</CardTitle>

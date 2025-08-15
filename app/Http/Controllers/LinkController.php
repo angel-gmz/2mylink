@@ -15,26 +15,31 @@ class LinkController extends Controller
 
     public function store(Request $request)
     {
-        // Validate the type first
-        $validatedType = $request->validate([
-            'type' => ['required', Rule::in(['link', 'divider'])]
-        ]);
-
+        // SOLUCIÓN: Validar todo en una sola llamada
         $rules = [
             'title' => ['required', 'string', 'max:255'],
+            'type' => ['required', Rule::in(['link', 'divider'])]
         ];
 
-        // Add URL validation only if it's a link
-        if ($validatedType['type'] === 'link') {
+        // Solo agregar validación de URL si el tipo es 'link'
+        if ($request->input('type') === 'link') {
             $rules['url'] = ['required', 'url', 'max:255'];
+        } else {
+            // Para dividers, URL es opcional
+            $rules['url'] = ['nullable', 'url', 'max:255'];
         }
 
         $validatedData = $request->validate($rules);
 
+        // Obtener el último valor de 'order' para el usuario actual
+        $lastOrder = $request->user()->links()->max('order');
+        $newOrder = is_null($lastOrder) ? 0 : $lastOrder + 1;
+
         $request->user()->links()->create([
             'title' => $validatedData['title'],
-            'url' => $validatedData['url'] ?? null, // Set URL to null for dividers
-            'type' => $validatedType['type'],
+            'url' => $validatedData['url'] ?? null,
+            'type' => $validatedData['type'],
+            'order' => $newOrder,
         ]);
 
         return Redirect::route('dashboard');
@@ -46,10 +51,17 @@ class LinkController extends Controller
     public function update(Request $request, Link $link)
     {
         $this->authorize('update', $link);
-        $rules = ['title' => ['required', 'string', 'max:255']];
+        
+        $rules = [
+            'title' => ['required', 'string', 'max:255']
+        ];
+        
         if ($link->type === 'link') {
             $rules['url'] = ['required', 'url', 'max:255'];
+        } else {
+            $rules['url'] = ['nullable', 'url', 'max:255'];
         }
+        
         $validated = $request->validate($rules);
         $link->update($validated);
         return Redirect::route('dashboard');
