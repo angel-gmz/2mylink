@@ -1,10 +1,9 @@
 import { type SharedData } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import { ArrowRight, CheckCircle, Palette, BarChart2, Globe, Twitter, Youtube } from 'lucide-react';
+import { ArrowRight, CheckCircle, Palette, BarChart2, Globe, Twitter, Youtube, X } from 'lucide-react';
 import { FormEventHandler } from 'react';
 
-// --- NUEVO: Componente de Enlace para la Maqueta ---
-// Esto nos permite añadir iconos fácilmente
+// --- Mockup Components ---
 const MockupLink = ({ icon, text }: { icon: React.ReactNode, text: string }) => (
     <div className="w-full bg-white text-slate-900 text-center font-semibold py-3 rounded-lg shadow-sm flex items-center justify-center gap-2">
         {icon}
@@ -12,7 +11,6 @@ const MockupLink = ({ icon, text }: { icon: React.ReactNode, text: string }) => 
     </div>
 );
 
-// Componente para la maqueta del teléfono
 const PhoneMockup = () => (
     <div className="relative mx-auto border-gray-800 dark:border-gray-800 bg-gray-800 border-[14px] rounded-[2.5rem] h-[600px] w-[300px] shadow-xl">
         <div className="w-[148px] h-[18px] bg-gray-800 top-0 rounded-b-[1rem] left-1/2 -translate-x-1/2 absolute"></div>
@@ -21,17 +19,14 @@ const PhoneMockup = () => (
         <div className="h-[64px] w-[3px] bg-gray-800 absolute -end-[17px] top-[142px] rounded-e-lg"></div>
         <div className="rounded-[2rem] overflow-hidden w-full h-full bg-slate-900">
             <div className="flex flex-col items-center p-8 pt-12 space-y-4">
-                {/* Perfil Falso */}
                 <div className="size-24 rounded-full bg-teal-500 flex items-center justify-center">
                     <span className="text-4xl font-bold text-slate-900">A</span>
                 </div>
                 <h2 className="text-xl font-bold text-white">@angeldev</h2>
                 <p className="text-sm text-slate-400">Welcome to my digital universe!</p>
-                
-                {/* --- GIRO ÚNICO: Enlaces con Iconos --- */}
                 <div className="w-full space-y-3 pt-4">
                     <MockupLink icon={<Globe size={20} />} text="My Portfolio" />
-                    <MockupLink icon={<Twitter size={20} />} text="Follow me on X" />
+                    <MockupLink icon={<X size={20} />} text="Follow me on X" />
                     <MockupLink icon={<Youtube size={20} />} text="Latest Video" />
                 </div>
             </div>
@@ -48,9 +43,35 @@ export default function Welcome() {
         get(route('register', { username: data.username }));
     };
 
+    const pageUrl = "https://2myl.ink";
+    const seo = {
+        title: "2myLink - The Only Link You'll Ever Need",
+        description: "Create a single, beautiful page to house all your important links. Perfect for your social media bios, portfolios, and connecting with your audience.",
+        image: `${pageUrl}/logo_social.png` // Assumes you have a social share image in your /public folder
+    };
+
     return (
         <>
-            <Head title="2myLink - The Only Link You'll Ever Need" />
+            <Head>
+                {/* Basic SEO and Page Title */}
+                <title>{seo.title}</title>
+                <meta name="description" content={seo.description} />
+
+                {/* Open Graph / Facebook / WhatsApp */}
+                <meta property="og:type" content="website" />
+                <meta property="og:url" content={pageUrl} />
+                <meta property="og:title" content={seo.title} />
+                <meta property="og:description" content={seo.description} />
+                <meta property="og:image" content={seo.image} />
+
+                {/* Twitter Card */}
+                <meta name="twitter:card" content="summary_large_image" />
+                <meta name="twitter:url" content={pageUrl} />
+                <meta name="twitter:title" content={seo.title} />
+                <meta name="twitter:description" content={seo.description} />
+                <meta name="twitter:image" content={seo.image} />
+            </Head>
+
             <div className="min-h-screen bg-slate-900 text-slate-200 font-sans">
                 {/* Header */}
                 <header className="absolute top-0 left-0 w-full z-10 p-6">
@@ -89,17 +110,14 @@ export default function Welcome() {
                                     <span className="text-teal-400">One Destination.</span>
                                 </h1>
                                 <p className="mt-6 max-w-lg mx-auto lg:mx-0 text-lg text-slate-400">
-                                    Create a single, beautiful page to house all your important links. Perfect for your social media bios, portfolios, and connecting with your audience.
+                                    {seo.description}
                                 </p>
-                                {/* --- SECCIÓN MEJORADA Y ALINEADA --- */}
                                 <form onSubmit={submit} className="mt-8 flex flex-col sm:flex-row gap-3 max-w-md mx-auto lg:mx-0">
                                     <div className="relative flex-grow">
-                                        {/* 1. Texto del dominio actualizado */}
                                         <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none">2myl.ink/</span>
                                         <input
                                             type="text"
                                             placeholder="your-username"
-                                            // 2. Padding izquierdo ajustado para el nuevo dominio
                                             className="w-full bg-slate-800 border border-slate-700 rounded-md py-3 pl-[85px] pr-4 text-white focus:ring-2 focus:ring-teal-500 focus:outline-none transition-colors"
                                             value={data.username}
                                             onChange={(e) => setData('username', e.target.value)}

@@ -51,12 +51,14 @@ export type Link = {
     id: number;
     user_id: number;
     title: string;
-    url: string;
+    url: string | null; // <-- MODIFIED: URL can be null for dividers
     created_at: string;
     updated_at: string;
-    // --- ADDED PROPERTIES ---
     order: number;
     clicks: number;
+    // --- ADDED PROPERTIES ---
+    type: 'link' | 'divider';
+    is_active: boolean;
 };
 
 export type PageProps<T extends Record<string, unknown> = Record<string, unknown>> = T & {

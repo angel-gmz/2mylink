@@ -13,7 +13,7 @@ class LinkController extends Controller
 {
     use AuthorizesRequests;
 
-public function store(Request $request)
+    public function store(Request $request)
     {
         // Validate the type first
         $validatedType = $request->validate([
@@ -40,38 +40,29 @@ public function store(Request $request)
         return Redirect::route('dashboard');
     }
 
- /**
+    /**
      * Update the specified link.
      */
     public function update(Request $request, Link $link)
     {
-        // Autoriza la acción usando la LinkPolicy
         $this->authorize('update', $link);
-
-        $rules = [
-            'title' => ['required', 'string', 'max:255'],
-        ];
-
-        // Only validate URL if it's a link
+        $rules = ['title' => ['required', 'string', 'max:255']];
         if ($link->type === 'link') {
             $rules['url'] = ['required', 'url', 'max:255'];
         }
-
         $validated = $request->validate($rules);
-
         $link->update($validated);
-
         return Redirect::route('dashboard');
     }
 
-     public function destroy(Link $link)
+    public function destroy(Link $link)
     {
         $this->authorize('delete', $link);
         $link->delete();
         return back();
     }
 
-        /**
+    /**
      * Update the order of the links.
      */
     public function updateOrder(Request $request)
@@ -88,5 +79,21 @@ public function store(Request $request)
         }
 
         return back();
+    }
+
+    /**
+     * Toggle the active state of a link.
+     */
+    public function toggle(Request $request, Link $link)
+    {
+        $this->authorize('update', $link);
+
+        $request->validate([
+            'is_active' => ['required', 'boolean'],
+        ]);
+
+        $link->update(['is_active' => $request->is_active]);
+
+        return back(303); 
     }
 }

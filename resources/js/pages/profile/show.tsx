@@ -43,6 +43,12 @@ interface ProfileUser {
     theme: keyof typeof themeStyles | null;
 }
 
+interface SeoData {
+    title: string;
+    description: string;
+    image: string;
+}
+
 // Create a more specific type for the items, which can be a link or a divider
 interface Item extends LinkType {
     type: 'link' | 'divider';
@@ -51,15 +57,36 @@ interface Item extends LinkType {
 // Define the props for the Show component explicitly
 interface ShowProps {
     user: ProfileUser;
-    links: Item[]; // Use the new, more specific Item type
+    links: Item[];
+    seo: SeoData;
 }
 
-export default function Show({ user, links }: ShowProps) {
+export default function Show({ user, links, seo }: ShowProps) {
     const currentTheme = themeStyles[user.theme || 'default'];
+    const pageUrl = `https://2myl.ink/${user.username}`;
 
     return (
         <>
-            <Head title={`${user.name} (@${user.username})`} />
+            <Head>
+                {/* Basic SEO and Page Title */}
+                <title>{seo.title}</title>
+                <meta name="description" content={seo.description} />
+
+                {/* Open Graph / Facebook / WhatsApp */}
+                <meta property="og:type" content="website" />
+                <meta property="og:url" content={pageUrl} />
+                <meta property="og:title" content={seo.title} />
+                <meta property="og:description" content={seo.description} />
+                <meta property="og:image" content={seo.image} />
+
+                {/* Twitter Card */}
+                <meta name="twitter:card" content="summary_large_image" />
+                <meta name="twitter:url" content={pageUrl} />
+                <meta name="twitter:title" content={seo.title} />
+                <meta name="twitter:description" content={seo.description} />
+                <meta name="twitter:image" content={seo.image} />
+            </Head>
+
             <div className={cn('min-h-screen flex flex-col items-center pt-10 sm:pt-16 transition-colors', currentTheme.bg, currentTheme.text)}>
                 <div className="size-24 rounded-full bg-gray-300 dark:bg-gray-700 mb-4 flex items-center justify-center overflow-hidden">
                     <img
@@ -76,14 +103,12 @@ export default function Show({ user, links }: ShowProps) {
                 <div className="w-full max-w-md px-4 space-y-4">
                     {links.map((item) =>
                         item.type === 'divider' ? (
-                            // Render a Divider
                             <div key={`divider-${item.id}`} className="pt-2">
                                 <h2 className={cn('text-center font-semibold', currentTheme.dividerText)}>
                                     {item.title}
                                 </h2>
                             </div>
                         ) : (
-                            // Render a Link
                             <a
                                 key={`link-${item.id}`}
                                 href={route('links.visit', item.id)}

@@ -40,6 +40,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('links/{link}', [LinkController::class, 'destroy'])->name('links.destroy');
     // MODIFIED: Changed URL to avoid conflict
     Route::patch('/update-link-order', [LinkController::class, 'updateOrder'])->name('links.order.update');
+    Route::patch('links/{link}/toggle', [LinkController::class, 'toggle'])->name('links.toggle');
 
     // Settings
     Route::patch('/settings/appearance', [AppearanceController::class, 'update'])->name('appearance.update');

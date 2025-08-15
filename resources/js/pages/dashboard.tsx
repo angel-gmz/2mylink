@@ -1,18 +1,19 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type Link as LinkType, type PageProps, type User } from '@/types';
-import { Head, Link as InertiaLink, router, useForm } from '@inertiajs/react';
+import { Head, router, useForm } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 
 import { DndContext, closestCenter, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 
 import EditLinkModal from '@/components/edit-link-modal';
+import QrCodeModal from '@/components/qr-code-modal';
 import SortableLinkItem from '@/components/sortable-link-item';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { BarChart2, Copy, Check, Link2, Minus } from 'lucide-react';
+import { Check, Copy, Link2, Minus, QrCode } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -22,24 +23,28 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-// Add the 'type' property to our Link type
-type LinkWithClicks = LinkType & { clicks: number; type: 'link' | 'divider' };
+type Item = LinkType & {
+    clicks: number;
+    type: 'link' | 'divider';
+    is_active: boolean;
+};
 
 interface DashboardUser extends User {
     username: string;
 }
 
-export default function Dashboard({ auth, links: initialLinks }: PageProps<{ links: LinkWithClicks[]; auth: { user: DashboardUser } }>) {
+export default function Dashboard({ auth, links: initialLinks }: PageProps<{ links: Item[]; auth: { user: DashboardUser } }>) {
     const [newItemType, setNewItemType] = useState<'link' | 'divider'>('link');
     const { data, setData, post, processing, errors, reset } = useForm({
         title: '',
         url: '',
-        type: 'link', // Default to creating a link
+        type: 'link',
     });
 
-    const [editingLink, setEditingLink] = useState<LinkWithClicks | null>(null);
+    const [editingLink, setEditingLink] = useState<Item | null>(null);
     const [links, setLinks] = useState(initialLinks);
     const [copied, setCopied] = useState(false);
+    const [isQrModalOpen, setIsQrModalOpen] = useState(false);
 
     const publicUrl = `https://2myl.ink/${auth.user.username}`;
 
@@ -73,7 +78,6 @@ export default function Dashboard({ auth, links: initialLinks }: PageProps<{ lin
         }
     }
 
-    // Function to switch between form types
     const handleSetNewItemType = (type: 'link' | 'divider') => {
         setNewItemType(type);
         setData('type', type);
@@ -85,6 +89,12 @@ export default function Dashboard({ auth, links: initialLinks }: PageProps<{ lin
             <Head title="Dashboard" />
 
             <EditLinkModal link={editingLink} isOpen={!!editingLink} onClose={() => setEditingLink(null)} />
+            <QrCodeModal
+                url={publicUrl}
+                username={auth.user.username}
+                isOpen={isQrModalOpen}
+                onClose={() => setIsQrModalOpen(false)}
+            />
 
             <div className="space-y-6 p-4 md:p-6">
                 {/* SHARE YOUR LINK CARD */}
@@ -95,9 +105,21 @@ export default function Dashboard({ auth, links: initialLinks }: PageProps<{ lin
                     <CardContent>
                         <p className="mb-2 text-sm text-muted-foreground">This is your public URL. Share it anywhere!</p>
                         <div className="flex items-center space-x-2">
-                            <Input value={publicUrl} readOnly className="flex-grow" />
-                            <Button variant="outline" onClick={copyToClipboard} className="w-[110px]">
-                                {copied ? <><Check className="mr-2 h-4 w-4" /> Copied!</> : <><Copy className="mr-2 h-4 w-4" /> Copy Link</>}
+                            {/* The fix is replacing 'flex-grow' with 'flex-1' */}
+                            <Input value={publicUrl} readOnly className="flex-1" />
+                            <Button variant="outline" size="icon" onClick={() => setIsQrModalOpen(true)} className="shrink-0">
+                                <QrCode className="h-4 w-4" />
+                            </Button>
+                            <Button variant="outline" onClick={copyToClipboard} className="shrink-0">
+                                {copied ? (
+                                    <>
+                                        <Check className="mr-2 h-4 w-4" /> Copied!
+                                    </>
+                                ) : (
+                                    <>
+                                        <Copy className="mr-2 h-4 w-4" /> Copy Link
+                                    </>
+                                )}
                             </Button>
                         </div>
                     </CardContent>
@@ -106,7 +128,6 @@ export default function Dashboard({ auth, links: initialLinks }: PageProps<{ lin
                 {/* ADD NEW ITEM FORM (LINK OR DIVIDER) */}
                 <Card>
                     <CardHeader>
-                        {/* Tabs to switch between Link and Divider */}
                         <div className="flex items-center border-b">
                             <button onClick={() => handleSetNewItemType('link')} className={cn('flex items-center gap-2 px-4 py-2 font-semibold', newItemType === 'link' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground')}>
                                 <Link2 size={16} /> Add Link
@@ -128,7 +149,6 @@ export default function Dashboard({ auth, links: initialLinks }: PageProps<{ lin
                                 />
                                 {errors.title && <p className="mt-1 text-sm text-red-600">{errors.title}</p>}
                             </div>
-                            {/* Conditionally render URL input */}
                             {newItemType === 'link' && (
                                 <div>
                                     <Label htmlFor="url">URL</Label>

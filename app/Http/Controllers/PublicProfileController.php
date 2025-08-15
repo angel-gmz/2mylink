@@ -3,14 +3,24 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class PublicProfileController extends Controller
 {
     public function show(User $user)
     {
-        // This correctly fetches the links in the desired order.
-        $links = $user->links()->orderBy('order', 'asc')->get();
+        $links = $user->links()
+            ->where('is_active', true)
+            ->orderBy('order', 'asc')
+            ->get();
+
+        // Prepara los datos para SEO y Open Graph
+        $seoData = [
+            'title' => $user->name . ' (@' . $user->username . ') | 2myLink',
+            'description' => $user->bio ?: 'Encuentra todos mis enlaces en un solo lugar.',
+            'image' => $user->avatar_path ? Storage::url($user->avatar_path) : asset('logo_social.png'),
+        ];
 
         return Inertia::render('profile/show', [
             'user' => [
@@ -20,8 +30,8 @@ class PublicProfileController extends Controller
                 'avatar_path' => $user->avatar_path,
                 'theme' => $user->theme,
             ],
-            // CORRECTED: Pass the ordered $links variable, not the unordered relationship.
             'links' => $links,
+            'seo' => $seoData, // Pasa los datos de SEO a la vista
         ]);
     }
 }
