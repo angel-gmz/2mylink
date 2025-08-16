@@ -1,6 +1,8 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useInitials } from '@/hooks/use-initials';
-import { type User } from '@/types'; // We only need the main User type now
+import { type User } from '@/types';
+import { Crown } from 'lucide-react'; // 1. Importar el ícono de la corona
+import { cn } from '@/lib/utils';
 
 export function UserInfo({ user, showEmail = false }: { user: User; showEmail?: boolean }) {
     const getInitials = useInitials();
@@ -8,14 +10,21 @@ export function UserInfo({ user, showEmail = false }: { user: User; showEmail?: 
     return (
         <>
             <Avatar className="h-8 w-8 overflow-hidden rounded-full">
-                {/* Correctly handle the null case by converting it to undefined */}
                 <AvatarImage src={user.avatar_url ?? undefined} alt={user.name} />
                 <AvatarFallback className="rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white">
                     {getInitials(user.name)}
                 </AvatarFallback>
             </Avatar>
             <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{user.name}</span>
+                {/* --- 2. Contenedor para el nombre y la insignia --- */}
+                <div className="flex items-center gap-1.5">
+                    <span className="truncate font-medium">{user.name}</span>
+                    
+                    {/* --- 3. Lógica para mostrar la insignia Premium --- */}
+                    {user.is_premium && (
+                        <Crown className="h-4 w-4 text-yellow-500 flex-shrink-0" />
+                    )}
+                </div>
                 {showEmail && <span className="truncate text-xs text-muted-foreground">{user.email}</span>}
             </div>
         </>

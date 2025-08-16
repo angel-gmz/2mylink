@@ -3,6 +3,7 @@
 use App\Http\Controllers\Settings\PasswordController;
 use App\Http\Controllers\Settings\ProfileController;
 use Illuminate\Support\Facades\Route;
+use App\Models\Theme;
 use Inertia\Inertia;
 
 Route::middleware('auth')->group(function () {
@@ -19,6 +20,12 @@ Route::middleware('auth')->group(function () {
         ->name('password.update');
 
     Route::get('settings/appearance', function () {
-        return Inertia::render('settings/appearance');
+        return Inertia::render('settings/appearance', [
+            'themes' => Theme::all(),
+        ]);
     })->name('appearance');
+
+    Route::get('settings/subscription', function () {
+        return Inertia::render('settings/subscription');
+    })->name('subscription');
 });

@@ -6,6 +6,7 @@ import { type BreadcrumbItem } from '@/types';
 
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
+import { Theme } from '@/types/theme';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -14,7 +15,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function Appearance() {
+export default function Appearance({ themes }: { themes: Theme[] }) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Appearance settings" />
@@ -22,7 +23,8 @@ export default function Appearance() {
             <SettingsLayout>
                 <div className="space-y-6">
                     <HeadingSmall title="Appearance settings" description="Update your account's appearance settings" />
-                    <AppearanceTabs />
+                    {/* Pass the themes to the component */}
+                    <AppearanceTabs themes={themes} />
                 </div>
             </SettingsLayout>
         </AppLayout>

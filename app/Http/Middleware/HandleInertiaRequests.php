@@ -45,13 +45,13 @@ class HandleInertiaRequests extends Middleware
                     'email' => $request->user()->email,
                     'username' => $request->user()->username,
                     'bio' => $request->user()->bio,
-                    // --- ESTA ES LA PARTE CORREGIDA Y FINAL ---
                     'avatar_path' => $request->user()->avatar_path,
-                    // Forzamos la URL completa usando la configuración de la app
                     'avatar_url' => $request->user()->avatar_path
                                     ? rtrim(config('app.url'), '/') . Storage::url($request->user()->avatar_path)
                                     : null,
                     'theme' => $request->user()->theme,
+                    'is_premium' => $request->user()->is_premium,
+                    'premium_expires_at' => $request->user()->premium_expires_at,
                 ] : null,
             ],
             'ziggy' => fn (): array => [

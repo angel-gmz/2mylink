@@ -1,46 +1,18 @@
 import { Head, Link as InertiaLink } from '@inertiajs/react';
-import { type Link as LinkType } from '@/types';
+import { type Link as LinkType, type Theme } from '@/types';
 import { cn } from '@/lib/utils';
+import { Crown } from 'lucide-react';
 
-// Define theme styles
-const themeStyles = {
-    default: {
-        bg: 'bg-gray-100 dark:bg-gray-900',
-        text: 'text-gray-800 dark:text-gray-200',
-        linkBg: 'bg-blue-500 hover:bg-blue-600',
-        linkText: 'text-white',
-        dividerText: 'text-gray-500 dark:text-gray-400',
-    },
-    dark: {
-        bg: 'bg-gray-900',
-        text: 'text-gray-100',
-        linkBg: 'bg-teal-500 hover:bg-teal-600',
-        linkText: 'text-white',
-        dividerText: 'text-gray-400',
-    },
-    mint: {
-        bg: 'bg-green-50',
-        text: 'text-green-900',
-        linkBg: 'bg-green-600 hover:bg-green-700',
-        linkText: 'text-white',
-        dividerText: 'text-green-700',
-    },
-    sunset: {
-        bg: 'bg-orange-100',
-        text: 'text-orange-900',
-        linkBg: 'bg-red-500 hover:bg-red-600',
-        linkText: 'text-white',
-        dividerText: 'text-orange-700',
-    },
-};
-
-// This interface now exactly matches the data sent from PublicProfileController
+// --- 1. TIPO CORREGIDO ---
+// Se define una interfaz explícita para el usuario del perfil público,
+// asegurando que cada propiedad tenga el tipo correcto y evitando conflictos.
 interface ProfileUser {
     name: string;
     username: string;
     bio: string | null;
-    avatar_path: string | null;
-    theme: keyof typeof themeStyles | null;
+    avatar_url: string | null;
+    theme: Theme;
+    is_premium: boolean;
 }
 
 interface SeoData {
@@ -49,12 +21,10 @@ interface SeoData {
     image: string;
 }
 
-// Create a more specific type for the items, which can be a link or a divider
 interface Item extends LinkType {
     type: 'link' | 'divider';
 }
 
-// Define the props for the Show component explicitly
 interface ShowProps {
     user: ProfileUser;
     links: Item[];
@@ -62,24 +32,24 @@ interface ShowProps {
 }
 
 export default function Show({ user, links, seo }: ShowProps) {
-    const currentTheme = themeStyles[user.theme || 'default'];
+    if (!user) {
+        return null;
+    }
+
+    const currentTheme = user.theme;
     const pageUrl = `https://2myl.ink/${user.username}`;
+    const hasGradient = currentTheme.gradient_from && currentTheme.gradient_to;
 
     return (
         <>
             <Head>
-                {/* Basic SEO and Page Title */}
                 <title>{seo.title}</title>
                 <meta name="description" content={seo.description} />
-
-                {/* Open Graph / Facebook / WhatsApp */}
                 <meta property="og:type" content="website" />
                 <meta property="og:url" content={pageUrl} />
                 <meta property="og:title" content={seo.title} />
                 <meta property="og:description" content={seo.description} />
                 <meta property="og:image" content={seo.image} />
-
-                {/* Twitter Card */}
                 <meta name="twitter:card" content="summary_large_image" />
                 <meta name="twitter:url" content={pageUrl} />
                 <meta name="twitter:title" content={seo.title} />
@@ -87,24 +57,38 @@ export default function Show({ user, links, seo }: ShowProps) {
                 <meta name="twitter:image" content={seo.image} />
             </Head>
 
-            <div className={cn('min-h-screen flex flex-col items-center pt-10 sm:pt-16 transition-colors', currentTheme.bg, currentTheme.text)}>
+            <div
+                className={cn(
+                    'min-h-screen flex flex-col items-center pt-10 sm:pt-16 transition-colors pb-8',
+                    currentTheme.text_color,
+                    hasGradient
+                        ? `bg-gradient-to-br ${currentTheme.gradient_from} ${currentTheme.gradient_to}`
+                        : currentTheme.bg_color,
+                )}
+            >
                 <div className="size-24 rounded-full bg-gray-300 dark:bg-gray-700 mb-4 flex items-center justify-center overflow-hidden">
                     <img
-                        src={user.avatar_path ? `/storage/${user.avatar_path}` : `https://ui-avatars.com/api/?name=${user.name}&background=random`}
+                        src={user.avatar_url || `https://ui-avatars.com/api/?name=${user.name}&background=random`}
                         alt={user.name}
                         className="h-full w-full object-cover"
                     />
                 </div>
 
-                <h1 className="text-xl font-semibold">{user.name}</h1>
+                <div className="flex items-center gap-2">
+                    <h1 className="text-xl font-semibold">{user.name}</h1>
+                    {user.is_premium && (
+                        <Crown className="h-5 w-5 text-yellow-500" />
+                    )}
+                </div>
+
                 <p className="text-md text-muted-foreground mb-4">@{user.username}</p>
-                {user.bio && <p className="max-w-md text-center mb-8">{user.bio}</p>}
+                {user.bio && <p className="max-w-md text-center mb-8 px-4">{user.bio}</p>}
 
                 <div className="w-full max-w-md px-4 space-y-4">
                     {links.map((item) =>
                         item.type === 'divider' ? (
                             <div key={`divider-${item.id}`} className="pt-2">
-                                <h2 className={cn('text-center font-semibold', currentTheme.dividerText)}>
+                                <h2 className={cn('text-center font-semibold', currentTheme.divider_text_color)}>
                                     {item.title}
                                 </h2>
                             </div>
@@ -114,8 +98,8 @@ export default function Show({ user, links, seo }: ShowProps) {
                                 href={route('links.visit', item.id)}
                                 className={cn(
                                     'block w-full text-center font-bold py-4 px-4 rounded-lg shadow-md transition-all duration-300 ease-in-out transform hover:-translate-y-1',
-                                    currentTheme.linkBg,
-                                    currentTheme.linkText,
+                                    currentTheme.link_bg_color,
+                                    currentTheme.link_text_color,
                                 )}
                             >
                                 {item.title}
@@ -124,14 +108,16 @@ export default function Show({ user, links, seo }: ShowProps) {
                     )}
                 </div>
 
-                <footer className="mt-12 text-center text-sm text-muted-foreground">
-                    <p>
-                        Powered by{' '}
-                        <InertiaLink href={route('home')} className="hover:underline font-semibold">
-                            2myLink
-                        </InertiaLink>
-                    </p>
-                </footer>
+                {!user.is_premium && (
+                    <footer className="mt-12 text-center text-sm text-muted-foreground">
+                        <p>
+                            Powered by{' '}
+                            <InertiaLink href={route('home')} className="hover:underline font-semibold">
+                                2myLink
+                            </InertiaLink>
+                        </p>
+                    </footer>
+                )}
             </div>
         </>
     );

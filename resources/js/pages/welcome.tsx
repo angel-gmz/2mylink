@@ -78,7 +78,7 @@ export default function Welcome() {
                 <header className="absolute top-0 left-0 w-full z-10 p-6">
                     <div className="container mx-auto flex items-center justify-between">
                         <Link href="/" className="flex items-center gap-3">
-                            <img src="/logo2ml_blanco.webp" alt="2myLink Logo" className="h-8" />
+                            <img src="/logo2ml_blanco.png" alt="2myLink Logo" className="h-8" />
                         </Link>
                         <nav className="flex items-center gap-4 text-sm font-medium">
                             {auth.user ? (

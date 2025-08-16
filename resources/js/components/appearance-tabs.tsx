@@ -1,15 +1,15 @@
-import { type PageProps, type User } from '@/types';
+import { type PageProps, type User, type Theme } from '@/types';
 import { useForm, usePage } from '@inertiajs/react';
 import { useEffect } from 'react';
 
 import { Appearance, useAppearance } from '@/hooks/use-appearance';
 import { cn } from '@/lib/utils';
-import { LucideIcon, Monitor, Moon, Sun } from 'lucide-react';
+import { LucideIcon, Monitor, Moon, Sun, Crown } from 'lucide-react';
 import { HTMLAttributes } from 'react';
 import HeadingSmall from './heading-small';
 import { Separator } from './ui/separator';
 
-// --- Componente para el tema del Admin Dashboard (el que tú proporcionaste) ---
+// --- Component for the Admin Dashboard Theme ---
 function AdminThemeToggle({ className = '', ...props }: HTMLAttributes<HTMLDivElement>) {
     const { appearance, updateAppearance } = useAppearance();
 
@@ -40,26 +40,10 @@ function AdminThemeToggle({ className = '', ...props }: HTMLAttributes<HTMLDivEl
     );
 }
 
-// --- Componente para el tema del Perfil Público (el que creamos nosotros) ---
-const publicThemes = [
-    { name: 'default', colors: ['bg-slate-100', 'bg-blue-500', 'bg-white'] },
-    { name: 'dark', colors: ['bg-gray-900', 'bg-teal-500', 'bg-gray-800'] },
-    { name: 'mint', colors: ['bg-green-50', 'bg-green-600', 'bg-white'] },
-    { name: 'sunset', colors: ['bg-orange-100', 'bg-red-500', 'bg-white'] },
-];
-
-interface AppearanceUser extends User {
-    theme?: string;
-}
-
-interface AppearancePageProps extends PageProps {
-    auth: {
-        user: AppearanceUser;
-    };
-}
-
-function PublicProfileThemeSelector() {
-    const { auth } = usePage<AppearancePageProps>().props;
+// --- Component for the Public Profile Theme ---
+function PublicProfileThemeSelector({ themes }: { themes: Theme[] }) {
+    const { auth } = usePage<PageProps>().props;
+    const isUserPremium = auth.user.is_premium;
 
     const { data, setData, patch, processing } = useForm({
         theme: auth.user.theme || 'default',
@@ -73,34 +57,61 @@ function PublicProfileThemeSelector() {
 
     return (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-            {publicThemes.map((theme) => (
-                <div key={theme.name}>
-                    <button
-                        type="button"
-                        onClick={() => setData('theme', theme.name)}
-                        className={cn(
-                            'w-full rounded-md border-2 p-2 transition-all duration-200',
-                            data.theme === theme.name ? 'border-primary' : 'border-transparent hover:border-muted',
-                        )}
-                        disabled={processing}
-                    >
-                        <div className="flex items-center justify-center space-x-2 rounded-md bg-muted p-4">
-                            {theme.colors.map((color, index) => (
-                                <span key={index} className={cn('size-8 rounded-full', color)} />
-                            ))}
-                        </div>
-                    </button>
-                    <p className="mt-2 text-center text-sm font-medium capitalize text-muted-foreground">
-                        {theme.name}
-                    </p>
-                </div>
-            ))}
+            {themes.map((theme) => {
+                const hasGradient = theme.gradient_from && theme.gradient_to;
+                const isLocked = hasGradient && !isUserPremium;
+
+                return (
+                    <div key={theme.name}>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                if (!isLocked) {
+                                    setData('theme', theme.name);
+                                }
+                            }}
+                            className={cn(
+                                'relative w-full rounded-md border-2 p-1 transition-all duration-200',
+                                data.theme === theme.name ? 'border-primary' : 'border-transparent hover:border-muted',
+                                isLocked && 'cursor-not-allowed'
+                            )}
+                            disabled={processing}
+                        >
+                            <div className={cn(
+                                'flex flex-col gap-2 rounded-md p-4 transition-all',
+                                hasGradient
+                                    ? `bg-gradient-to-br ${theme.gradient_from} ${theme.gradient_to}`
+                                    : theme.bg_color,
+                                isLocked && 'filter grayscale opacity-60'
+                            )}>
+                                <p className={cn('text-xs font-semibold', theme.text_color)}>@username</p>
+                                <div className={cn('w-full rounded-md p-2 text-center text-xs font-bold', theme.link_bg_color, theme.link_text_color)}>
+                                    Link
+                                </div>
+                                <div className={cn('w-full rounded-md p-2 text-center text-xs font-bold', theme.link_bg_color, theme.link_text_color)}>
+                                    Link
+                                </div>
+                            </div>
+
+                            {/* --- CAMBIO: Mostrar la corona si el tema es premium (tiene degradado) --- */}
+                            {hasGradient && (
+                                <div className="absolute top-2 right-2 flex h-6 w-6 items-center justify-center rounded-full bg-yellow-500 p-1 shadow-md">
+                                    <Crown className="h-4 w-4 text-white" />
+                                </div>
+                            )}
+                        </button>
+                        <p className="mt-2 text-center text-sm font-medium capitalize text-muted-foreground">
+                            {theme.name}
+                        </p>
+                    </div>
+                );
+            })}
         </div>
     );
 }
 
-// --- Componente Principal que une ambos ---
-export default function AppearanceTabs() {
+// --- Main Component that combines both selectors ---
+export default function AppearanceTabs({ themes }: { themes: Theme[] }) {
     return (
         <div className="space-y-8">
             <div>
@@ -115,7 +126,7 @@ export default function AppearanceTabs() {
             <div>
                 <HeadingSmall title="Public Profile Theme" description="Select a color palette for your public page." />
                 <div className="mt-4">
-                    <PublicProfileThemeSelector />
+                    <PublicProfileThemeSelector themes={themes} />
                 </div>
             </div>
         </div>

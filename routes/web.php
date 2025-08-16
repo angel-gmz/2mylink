@@ -63,17 +63,25 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 // Include separate route files for auth and settings
-require __DIR__.'/auth.php';
-require __DIR__.'/settings.php';
+require __DIR__ . '/auth.php';
+require __DIR__ . '/settings.php';
 
 // Temporary route for running migrations in production.
 // IMPORTANT: REMOVE THIS ROUTE AFTER YOU HAVE USED IT.
 Route::get('/rtdavbfbgij12345', function () {
     Artisan::call('migrate', ['--force' => true]);
     return 'Migrations executed successfully!';
-    });
-    
-    /*
+});
+
+Route::get('/rtthemrtdavbfbgij12345', function () {
+    Artisan::call('db:seed', [
+        '--class' => 'ThemeSeeder',
+        '--force' => true
+    ]);
+    return 'ThemeSeeder executed successfully!';
+});
+
+/*
 Route::get('/rtdasadsgij1234sb', function () {
     // Borra el enlace viejo si existe, para evitar errores
     if (file_exists(public_path('storage'))) {

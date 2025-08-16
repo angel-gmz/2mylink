@@ -6,6 +6,7 @@ import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
 import { type PropsWithChildren } from 'react';
 
+// --- 1. Añadir el nuevo enlace de navegación ---
 const sidebarNavItems: NavItem[] = [
     {
         title: 'Profile',
@@ -20,6 +21,11 @@ const sidebarNavItems: NavItem[] = [
     {
         title: 'Appearance',
         href: '/settings/appearance',
+        icon: null,
+    },
+    {
+        title: 'Subscription', // <-- Nuevo enlace
+        href: '/settings/subscription',
         icon: null,
     },
 ];
