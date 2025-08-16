@@ -1,11 +1,10 @@
-import { type PageProps, type User, type Theme } from '@/types';
+import { type PageProps, type Theme } from '@/types';
 import { useForm, usePage } from '@inertiajs/react';
-import { useEffect } from 'react';
+import { Crown, LucideIcon, Monitor, Moon, Sun } from 'lucide-react';
+import { type HTMLAttributes, useEffect } from 'react';
 
 import { Appearance, useAppearance } from '@/hooks/use-appearance';
 import { cn } from '@/lib/utils';
-import { LucideIcon, Monitor, Moon, Sun, Crown } from 'lucide-react';
-import { HTMLAttributes } from 'react';
 import HeadingSmall from './heading-small';
 import { Separator } from './ui/separator';
 
@@ -58,8 +57,21 @@ function PublicProfileThemeSelector({ themes }: { themes: Theme[] }) {
     return (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
             {themes.map((theme) => {
-                const hasGradient = theme.gradient_from && theme.gradient_to;
-                const isLocked = hasGradient && !isUserPremium;
+                // --- CAMBIO 1: Leer todas las propiedades opcionales desde `theme.properties` ---
+                const {
+                    gradient_from,
+                    gradient_to,
+                    bg_color,
+                    link_animation,
+                    // Agrega aquí futuras propiedades como button_style, font_family, etc.
+                } = theme.properties || {}; // Usamos un objeto vacío como fallback
+
+                // Lógica para determinar el fondo (gradiente tiene prioridad)
+                const backgroundClass = gradient_from && gradient_to
+                    ? `bg-gradient-to-br ${gradient_from} ${gradient_to}`
+                    : bg_color;
+
+                const isLocked = theme.is_premium && !isUserPremium;
 
                 return (
                     <div key={theme.name}>
@@ -77,28 +89,38 @@ function PublicProfileThemeSelector({ themes }: { themes: Theme[] }) {
                             )}
                             disabled={processing}
                         >
+                            {/* --- CAMBIO 2: Aplicar la clase de fondo correcta --- */}
                             <div className={cn(
                                 'flex flex-col gap-2 rounded-md p-4 transition-all',
-                                hasGradient
-                                    ? `bg-gradient-to-br ${theme.gradient_from} ${theme.gradient_to}`
-                                    : theme.bg_color,
+                                backgroundClass, // Se aplica el fondo (sólido o gradiente)
                                 isLocked && 'filter grayscale opacity-60'
                             )}>
                                 <p className={cn('text-xs font-semibold', theme.text_color)}>@username</p>
-                                <div className={cn('w-full rounded-md p-2 text-center text-xs font-bold', theme.link_bg_color, theme.link_text_color)}>
+
+                                {/* --- CAMBIO 3: Aplicar la animación a los links --- */}
+                                <div className={cn(
+                                    'w-full rounded-md p-2 text-center text-xs font-bold',
+                                    theme.link_bg_color,
+                                    theme.link_text_color,
+                                    link_animation // Se aplica la animación si existe
+                                )}>
                                     Link
                                 </div>
-                                <div className={cn('w-full rounded-md p-2 text-center text-xs font-bold', theme.link_bg_color, theme.link_text_color)}>
+                                <div className={cn(
+                                    'w-full rounded-md p-2 text-center text-xs font-bold',
+                                    theme.link_bg_color,
+                                    theme.link_text_color,
+                                    link_animation // Se aplica la animación si existe
+                                )}>
                                     Link
                                 </div>
                             </div>
 
-                            {/* --- CAMBIO: Mostrar la corona si el tema es premium (tiene degradado) --- */}
-                            {hasGradient && (
+                            {theme.is_premium ? (
                                 <div className="absolute top-2 right-2 flex h-6 w-6 items-center justify-center rounded-full bg-yellow-500 p-1 shadow-md">
                                     <Crown className="h-4 w-4 text-white" />
                                 </div>
-                            )}
+                            ) : null}
                         </button>
                         <p className="mt-2 text-center text-sm font-medium capitalize text-muted-foreground">
                             {theme.name}
@@ -109,6 +131,7 @@ function PublicProfileThemeSelector({ themes }: { themes: Theme[] }) {
         </div>
     );
 }
+
 
 // --- Main Component that combines both selectors ---
 export default function AppearanceTabs({ themes }: { themes: Theme[] }) {

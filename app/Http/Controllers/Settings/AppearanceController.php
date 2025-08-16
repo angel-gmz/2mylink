@@ -15,7 +15,7 @@ class AppearanceController extends Controller
      */
     public function update(Request $request)
     {
-        // 2. Validar que el tema exista en la base de datos
+        // 1. Validar que el tema exista en la base de datos
         $validated = $request->validate([
             'theme' => ['required', 'string', Rule::in(Theme::pluck('name')->all())],
         ]);
@@ -23,16 +23,17 @@ class AppearanceController extends Controller
         $selectedTheme = Theme::where('name', $validated['theme'])->first();
         $user = $request->user();
 
-        // 3. Lógica de validación para usuarios Premium
-        // Si el tema tiene degradado Y el usuario NO es premium
-        if ($selectedTheme->gradient_from && !$user->is_premium) {
+        // --- CAMBIO PRINCIPAL ---
+        // 2. Lógica de validación para usuarios Premium usando la bandera `is_premium`
+        // Si el tema es premium Y el usuario NO es premium
+        if ($selectedTheme->is_premium && !$user->is_premium) {
             // Lanzar un error de validación
             throw ValidationException::withMessages([
-                'theme' => 'You must be a premium user to select a gradient theme.',
+                'theme' => 'You must be a premium user to select this theme.',
             ]);
         }
 
-        // Si la validación pasa, se actualiza el tema del usuario
+        // 3. Si la validación pasa, se actualiza el tema del usuario
         $user->update($validated);
 
         return back();

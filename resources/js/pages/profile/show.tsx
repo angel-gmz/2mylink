@@ -3,15 +3,14 @@ import { type Link as LinkType, type Theme } from '@/types';
 import { cn } from '@/lib/utils';
 import { Crown } from 'lucide-react';
 
-// --- 1. TIPO CORREGIDO ---
-// Se define una interfaz explícita para el usuario del perfil público,
-// asegurando que cada propiedad tenga el tipo correcto y evitando conflictos.
+// --- Interfaces para el tipado de las props ---
+
 interface ProfileUser {
     name: string;
     username: string;
     bio: string | null;
     avatar_url: string | null;
-    theme: Theme;
+    theme: Theme; // Usa la interfaz de Theme actualizada
     is_premium: boolean;
 }
 
@@ -31,14 +30,39 @@ interface ShowProps {
     seo: SeoData;
 }
 
+/**
+ * Componente que renderiza la página de perfil público de un usuario.
+ * Muestra la información del usuario, sus enlaces y aplica el tema seleccionado.
+ */
 export default function Show({ user, links, seo }: ShowProps) {
+    // Si no hay datos de usuario, no renderizar nada para evitar errores.
     if (!user) {
         return null;
     }
 
     const currentTheme = user.theme;
     const pageUrl = `https://2myl.ink/${user.username}`;
-    const hasGradient = currentTheme.gradient_from && currentTheme.gradient_to;
+
+    // --- LÓGICA DE ESTILOS ---
+    // 1. Desestructuramos todas las propiedades de estilo desde `theme.properties`.
+    // 2. Asignamos valores por defecto para asegurar que la página siempre tenga un estilo base
+    //    y no se rompa si alguna propiedad no está definida en un tema.
+    const {
+        gradient_from,
+        gradient_to,
+        bg_color,
+        divider_text_color,
+        font_family = 'font-sans',       // Valor por defecto
+        avatar_style = 'rounded-full',  // Valor por defecto
+        button_style = 'rounded-lg',    // Valor por defecto
+        button_shadow = 'shadow-md',    // Valor por defecto
+        link_animation,
+    } = currentTheme.properties || {}; // Usamos un objeto vacío como fallback por seguridad.
+
+    // 3. Determinamos la clase de fondo a aplicar. El gradiente tiene prioridad sobre el color sólido.
+    const backgroundClass = gradient_from && gradient_to
+        ? `bg-gradient-to-br ${gradient_from} ${gradient_to}`
+        : bg_color;
 
     return (
         <>
@@ -57,16 +81,20 @@ export default function Show({ user, links, seo }: ShowProps) {
                 <meta name="twitter:image" content={seo.image} />
             </Head>
 
+            {/* Contenedor principal de la página */}
             <div
                 className={cn(
                     'min-h-screen flex flex-col items-center pt-10 sm:pt-16 transition-colors pb-8',
-                    currentTheme.text_color,
-                    hasGradient
-                        ? `bg-gradient-to-br ${currentTheme.gradient_from} ${currentTheme.gradient_to}`
-                        : currentTheme.bg_color,
+                    currentTheme.text_color, // Color de texto esencial
+                    backgroundClass,         // Fondo dinámico (sólido o gradiente)
+                    font_family,             // Fuente dinámica
                 )}
             >
-                <div className="size-24 rounded-full bg-gray-300 dark:bg-gray-700 mb-4 flex items-center justify-center overflow-hidden">
+                {/* Avatar del usuario */}
+                <div className={cn(
+                    "size-24 bg-gray-300 dark:bg-gray-700 mb-4 flex items-center justify-center overflow-hidden",
+                    avatar_style // Estilo de avatar dinámico
+                )}>
                     <img
                         src={user.avatar_url || `https://ui-avatars.com/api/?name=${user.name}&background=random`}
                         alt={user.name}
@@ -74,6 +102,7 @@ export default function Show({ user, links, seo }: ShowProps) {
                     />
                 </div>
 
+                {/* Información del usuario */}
                 <div className="flex items-center gap-2">
                     <h1 className="text-xl font-semibold">{user.name}</h1>
                     {user.is_premium && (
@@ -84,11 +113,12 @@ export default function Show({ user, links, seo }: ShowProps) {
                 <p className="text-md text-muted-foreground mb-4">@{user.username}</p>
                 {user.bio && <p className="max-w-md text-center mb-8 px-4">{user.bio}</p>}
 
+                {/* Lista de enlaces y divisores */}
                 <div className="w-full max-w-md px-4 space-y-4">
                     {links.map((item) =>
                         item.type === 'divider' ? (
                             <div key={`divider-${item.id}`} className="pt-2">
-                                <h2 className={cn('text-center font-semibold', currentTheme.divider_text_color)}>
+                                <h2 className={cn('text-center font-semibold', divider_text_color)}>
                                     {item.title}
                                 </h2>
                             </div>
@@ -97,9 +127,12 @@ export default function Show({ user, links, seo }: ShowProps) {
                                 key={`link-${item.id}`}
                                 href={route('links.visit', item.id)}
                                 className={cn(
-                                    'block w-full text-center font-bold py-4 px-4 rounded-lg shadow-md transition-all duration-300 ease-in-out transform hover:-translate-y-1',
-                                    currentTheme.link_bg_color,
-                                    currentTheme.link_text_color,
+                                    'block w-full text-center font-bold py-4 px-4 transition-all duration-300 ease-in-out transform hover:-translate-y-1',
+                                    currentTheme.link_bg_color,   // Color de fondo del link (esencial)
+                                    currentTheme.link_text_color, // Color de texto del link (esencial)
+                                    button_style,                 // Estilo de bordes del botón
+                                    button_shadow,                // Sombra del botón
+                                    link_animation,               // Animación del botón
                                 )}
                             >
                                 {item.title}
@@ -108,6 +141,7 @@ export default function Show({ user, links, seo }: ShowProps) {
                     )}
                 </div>
 
+                {/* Pie de página con branding (solo para usuarios no premium) */}
                 {!user.is_premium && (
                     <footer className="mt-12 text-center text-sm text-muted-foreground">
                         <p>

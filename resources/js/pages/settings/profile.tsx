@@ -125,6 +125,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                             <Input
                                 id="email"
                                 type="email"
+                                readOnly={true}
                                 value={data.email}
                                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setData('email', e.target.value)}
                                 required

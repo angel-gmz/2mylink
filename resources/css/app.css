@@ -139,3 +139,81 @@
         @apply bg-background text-foreground;
     }
 }
+
+/*
+ * --- NUEVO: Animaciones personalizadas más lentas ---
+ */
+.animate-pulse-slow {
+  animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-bounce-slow {
+  animation: bounce 2s infinite;
+}
+
+/* Keyframes de 'pulse' (puedes omitir si no lo has modificado) */
+@keyframes pulse {
+  50% {
+    opacity: .5;
+  }
+}
+
+/* Keyframes de 'bounce' (puedes omitir si no lo has modificado) */
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(-25%);
+    animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+  }
+  50% {
+    transform: translateY(0);
+    animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  }
+}
+
+/* --- Resplandor --- */
+.animate-glow {
+  animation: glow 2.5s ease-in-out infinite;
+}
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 0 5px transparent; /* Usamos 'transparent' directamente */
+  }
+  50% {
+    /* Usamos una variable CSS para el color del brillo */
+    box-shadow: 0 0 20px 5px var(--glow-color, rgba(0, 255, 255, 0.5)); /* <-- ¡CORREGIDO! */
+  }
+}
+
+/* --- Flotante --- */
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+  100% { transform: translateY(0px); }
+}
+
+/* --- Temblor Suave --- */
+.animate-wobble {
+  animation: wobble 2.5s ease-in-out infinite;
+}
+@keyframes wobble {
+  0%, 100% { transform: translateX(0%); }
+  15% { transform: translateX(-5px) rotate(-3deg); }
+  30% { transform: translateX(3px) rotate(2deg); }
+  45% { transform: translateX(-3px) rotate(-1deg); }
+  60% { transform: translateX(2px) rotate(1deg); }
+  75% { transform: translateX(-1px) rotate(0deg); }
+}
+
+/* --- Cambio de Color (para fondos degradados) --- */
+.animate-color-shift {
+  background-size: 200% 200%;
+  animation: color-shift 4s ease infinite;
+}
+@keyframes color-shift {
+  0%{ background-position: 0% 50%; }
+  50%{ background-position: 100% 50%; }
+  100%{ background-position: 0% 50%; }
+}
