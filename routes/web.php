@@ -68,12 +68,13 @@ require __DIR__ . '/settings.php';
 
 // Temporary route for running migrations in production.
 // IMPORTANT: REMOVE THIS ROUTE AFTER YOU HAVE USED IT.
+/*
 Route::get('/rtdavbfbgij12345', function () {
     Artisan::call('migrate', ['--force' => true]);
     return 'Migrations executed successfully!';
 });
-
-Route::get('/rtthemrtdavbfbgij12345', function () {
+*/
+Route::get('/rtdavbfbgij12345', function () {
     Artisan::call('db:seed', [
         '--class' => 'ThemeSeeder',
         '--force' => true
