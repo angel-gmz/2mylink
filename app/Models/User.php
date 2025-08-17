@@ -7,12 +7,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-
+use Laravel\Cashier\Billable; // <-- Asegúrate de que esta línea esté presente
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, Billable; // <-- Asegúrate de que 'Billable' esté aquí
 
     /**
      * The attributes that are mass assignable.
@@ -31,7 +31,8 @@ class User extends Authenticatable
         'onboarded',
         'is_premium',
         'premium_expires_at',
-
+        // Cashier añadirá automáticamente 'stripe_id', 'pm_type', 'pm_last_four', 'trial_ends_at'
+        // a la tabla si ejecutas las migraciones de Cashier.
     ];
 
     /**
@@ -64,10 +65,14 @@ class User extends Authenticatable
         return $this->hasMany(Link::class);
     }
 
+    /**
+     * Determina si el usuario es premium.
+     * Utiliza el método 'subscribed' de Cashier para una verificación más precisa con Stripe.
+     */
     public function isPremium(): bool
     {
-        // Un usuario es premium si su fecha de expiración no es nula
-        // y es una fecha en el futuro.
-        return $this->premium_expires_at !== null && $this->premium_expires_at->isFuture();
+        // 'default' es el nombre del plan de suscripción en Cashier
+        // Esto verifica si el usuario tiene una suscripción activa y válida con Stripe
+        return $this->subscribed('default');
     }
 }

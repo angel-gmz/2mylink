@@ -1,4 +1,4 @@
-import { type PageProps, type Theme } from '@/types';
+import { type PageProps, type Theme, type User as BaseUser } from '@/types'; // Import BaseUser to extend
 import { useForm, usePage } from '@inertiajs/react';
 import { Crown, LucideIcon, Monitor, Moon, Sun } from 'lucide-react';
 import { type HTMLAttributes, useEffect } from 'react';
@@ -7,6 +7,12 @@ import { Appearance, useAppearance } from '@/hooks/use-appearance';
 import { cn } from '@/lib/utils';
 import HeadingSmall from './heading-small';
 import { Separator } from './ui/separator';
+
+// Extend the User type to include the new Cashier prop
+interface AppUser extends BaseUser {
+    is_premium: boolean; // Keep if still used for other props/display
+    is_subscribed_via_cashier?: boolean; // New prop from middleware
+}
 
 // --- Component for the Admin Dashboard Theme ---
 function AdminThemeToggle({ className = '', ...props }: HTMLAttributes<HTMLDivElement>) {
@@ -41,8 +47,10 @@ function AdminThemeToggle({ className = '', ...props }: HTMLAttributes<HTMLDivEl
 
 // --- Component for the Public Profile Theme ---
 function PublicProfileThemeSelector({ themes }: { themes: Theme[] }) {
-    const { auth } = usePage<PageProps>().props;
-    const isUserPremium = auth.user.is_premium;
+    // Use the extended AppUser type for usePage
+    const { auth } = usePage<PageProps & { auth: { user: AppUser } }>().props;
+    // --- CAMBIO CLAVE: Usamos is_subscribed_via_cashier para determinar si el usuario es Premium ---
+    const isUserPremium = auth.user.is_subscribed_via_cashier;
 
     const { data, setData, patch, processing } = useForm({
         theme: auth.user.theme || 'default',

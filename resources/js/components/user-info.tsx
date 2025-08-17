@@ -1,10 +1,15 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useInitials } from '@/hooks/use-initials';
-import { type User } from '@/types';
-import { Crown } from 'lucide-react'; // 1. Importar el ícono de la corona
+import { type PageProps, type User } from '@/types';
+import { Crown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-export function UserInfo({ user, showEmail = false }: { user: User; showEmail?: boolean }) {
+// Extender el tipo User para incluir el nuevo prop de Cashier
+interface UserWithSubscriptionStatus extends User {
+    is_subscribed_via_cashier?: boolean;
+}
+
+export function UserInfo({ user, showEmail = false }: { user: UserWithSubscriptionStatus; showEmail?: boolean }) {
     const getInitials = useInitials();
 
     return (
@@ -16,12 +21,11 @@ export function UserInfo({ user, showEmail = false }: { user: User; showEmail?: 
                 </AvatarFallback>
             </Avatar>
             <div className="grid flex-1 text-left text-sm leading-tight">
-                {/* --- 2. Contenedor para el nombre y la insignia --- */}
                 <div className="flex items-center gap-1.5">
                     <span className="truncate font-medium">{user.name}</span>
-                    
-                    {/* --- 3. Lógica para mostrar la insignia Premium --- */}
-                    {user.is_premium && (
+
+                    {/* Usamos user.is_subscribed_via_cashier para la insignia Premium */}
+                    {user.is_subscribed_via_cashier && (
                         <Crown className="h-4 w-4 text-yellow-500 flex-shrink-0" />
                     )}
                 </div>
