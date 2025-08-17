@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use App\Http\Controllers\StripeWebhookController; 
 
 /*
 |--------------------------------------------------------------------------
@@ -42,7 +43,7 @@ Route::get('/', function () {
 // Webhook de Stripe: Debe ser accesible públicamente para que Stripe envíe las notificaciones.
 Route::post(
     '/stripe/webhook',
-    '\Laravel\Cashier\Http\Controllers\WebhookController@handleWebhook'
+    [StripeWebhookController::class, 'handleWebhook'] 
 );
 // --- FIN RUTAS DE STRIPE CASHIER (PÚBLICAS) ---
 
