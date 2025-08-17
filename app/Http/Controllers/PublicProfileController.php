@@ -27,6 +27,10 @@ class PublicProfileController extends Controller
 
         Inertia::share('seo', $seoData);
 
+        // --- CAMBIO CLAVE: Pasar el estado premium usando el método isPremium() del modelo ---
+        // Esto asegura que el perfil público refleje el estado premium de Cashier.
+        $isUserPremium = $user->isPremium(); // Llama al método isPremium() en el modelo User
+
         return Inertia::render('profile/show', [
             'user' => [
                 'name' => $user->name,
@@ -35,7 +39,9 @@ class PublicProfileController extends Controller
                 'avatar_path' => $user->avatar_path,
                 'theme' => $selectedTheme,
                 'avatar_url' => $user->avatar_path ? Storage::url($user->avatar_path) : null,
-                'is_premium' => $user->is_premium, 
+                'is_premium' => $isUserPremium, // Usamos el valor calculado por isPremium()
+                // También puedes pasar 'is_subscribed_via_cashier' si lo necesitas explícitamente,
+                // pero 'is_premium' ahora ya lo refleja.
             ],
             'links' => $links,
             'seo' => $seoData,

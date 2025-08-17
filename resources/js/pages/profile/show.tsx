@@ -5,13 +5,15 @@ import { Crown } from 'lucide-react';
 
 // --- Interfaces para el tipado de las props ---
 
+// Extender la interfaz ProfileUser para incluir el nuevo prop de Cashier
 interface ProfileUser {
     name: string;
     username: string;
     bio: string | null;
     avatar_url: string | null;
     theme: Theme; // Usa la interfaz de Theme actualizada
-    is_premium: boolean;
+    is_premium: boolean; // Mantener si todavía lo usas para props o visualización
+    is_subscribed_via_cashier?: boolean; // Nuevo prop desde el middleware (no usado directamente aquí)
 }
 
 interface SeoData {
@@ -64,6 +66,9 @@ export default function Show({ user, links, seo }: ShowProps) {
         ? `bg-gradient-to-br ${gradient_from} ${gradient_to}`
         : bg_color;
 
+    // --- CAMBIO CLAVE: Usamos user.is_premium que es el prop que viene del controlador ---
+    const isUserPremium = user.is_premium;
+
     return (
         <>
             <Head>
@@ -84,7 +89,7 @@ export default function Show({ user, links, seo }: ShowProps) {
             {/* Contenedor principal de la página */}
             <div
                 className={cn(
-                    'min-h-screen flex flex-col items-center pt-10 sm:pt-16 transition-colors pb-8',
+                    'min-h-screen flex flex-col items-center pt-10 sm:pt-16 pb-8 transition-colors',
                     currentTheme.text_color, // Color de texto esencial
                     backgroundClass,         // Fondo dinámico (sólido o gradiente)
                     font_family,             // Fuente dinámica
@@ -105,7 +110,8 @@ export default function Show({ user, links, seo }: ShowProps) {
                 {/* Información del usuario */}
                 <div className="flex items-center gap-2">
                     <h1 className="text-xl font-semibold">{user.name}</h1>
-                    {user.is_premium && (
+                    {/* CAMBIO CLAVE: Usamos is_premium para la insignia Premium */}
+                    {isUserPremium && (
                         <Crown className="h-5 w-5 text-yellow-500" />
                     )}
                 </div>
@@ -142,7 +148,8 @@ export default function Show({ user, links, seo }: ShowProps) {
                 </div>
 
                 {/* Pie de página con branding (solo para usuarios no premium) */}
-                {!user.is_premium && (
+                {/* CAMBIO CLAVE: Usamos is_premium para ocultar el branding */}
+                {!isUserPremium && (
                     <footer className="mt-12 text-center text-sm text-muted-foreground">
                         <p>
                             Powered by{' '}

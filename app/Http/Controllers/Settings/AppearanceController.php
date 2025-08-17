@@ -24,9 +24,9 @@ class AppearanceController extends Controller
         $user = $request->user();
 
         // --- CAMBIO PRINCIPAL ---
-        // 2. Lógica de validación para usuarios Premium usando la bandera `is_premium`
-        // Si el tema es premium Y el usuario NO es premium
-        if ($selectedTheme->is_premium && !$user->is_premium) {
+        // 2. Lógica de validación para usuarios Premium usando el método isPremium() del modelo User
+        // Si el tema es premium Y el usuario NO es premium (según el método isPremium() de Cashier)
+        if ($selectedTheme->is_premium && !$user->isPremium()) { // <-- ¡CAMBIO CLAVE AQUÍ!
             // Lanzar un error de validación
             throw ValidationException::withMessages([
                 'theme' => 'You must be a premium user to select this theme.',
