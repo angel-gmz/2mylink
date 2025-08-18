@@ -65,7 +65,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/subscribe', function (Request $request) {
         // IMPORTANTE: Reemplaza 'YOUR_RECURRING_PRICE_ID' con el ID del PRECIO RECURRENTE
         // que creaste en tu Dashboard de Stripe (debe empezar con 'price_').
-        return $request->user()->newSubscription('default', 'price_1RwvhuHHMXVwjbhqrj6mBvM9')
+        return $request->user()->newSubscription('default', 'price_1RxGwqHHMXVwjbhq5592k1d5')
             ->allowPromotionCodes() // Permite códigos promocionales si los tienes
             ->checkout([
                 'success_url' => route('subscription.success'), // Redirige aquí tras un pago exitoso
