@@ -37,11 +37,6 @@ export function AppSidebar() {
             href: `https://2myl.ink/${auth.user.username}`,
             icon: ExternalLink,
         },
-        {
-            title: 'Support this project',
-            href: '',
-            icon: Coffee,
-        },
     ];
 
     return (

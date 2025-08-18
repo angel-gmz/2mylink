@@ -2,10 +2,9 @@ import SettingsLayout from '@/layouts/settings/layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { PageProps, User as BaseUser } from '@/types';
-import { usePage, Link } from '@inertiajs/react';
+import { usePage, Link } from '@inertiajs/react'; // Mantener Link si lo usas en otros lugares, pero no para este botón
 import { Crown } from 'lucide-react';
 
-// Import AppLayout and BreadcrumbItem for the main layout
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types'; 
 
@@ -52,13 +51,9 @@ export default function SubscriptionPage() {
     const isUserPremium = user?.is_subscribed_via_cashier;
 
     return (
-        // *** KEY CHANGE: Nest SettingsLayout inside AppLayout ***
         <AppLayout breadcrumbs={breadcrumbs}>
             <SettingsLayout>
                 <div className="space-y-8">
-                    {/* Optionally add a HeadingSmall here if you have one, like in Profile.tsx */}
-                    {/* <HeadingSmall title="Subscription Status" description="Manage your premium subscription." /> */}
-
                     {isUserPremium ? (
                         // --- PREMIUM USER VIEW ---
                         <Card>
@@ -80,7 +75,11 @@ export default function SubscriptionPage() {
                                     Thank you for your support! You have access to all exclusive features, including gradient themes.
                                 </p>
                                 <Button variant="outline" asChild>
-                                    <Link href={route('billing.portal')}>Manage Subscription</Link>
+                                    {/* CAMBIO CLAVE: Usar una etiqueta <a> estándar para forzar la redirección del navegador */}
+                                    {/* La función route() de Laravel estará disponible globalmente en tu JS de Vite */}
+                                    <a href={route('billing.portal')} className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2">
+                                        Manage Subscription
+                                    </a>
                                 </Button>
                             </CardContent>
                         </Card>
