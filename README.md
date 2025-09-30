@@ -122,6 +122,6 @@ Distributed under the MIT License. See `LICENSE.md` for more information.
 
 ## Contact
 
-Your Name - [@your_twitter_handle](https://twitter.com/your_twitter_handle) - your.email@example.com
+Angel Gómez - [@angel-gmz](https://www.linkedin.com/in/angel-gmz) - angel-gomez@hotmail.com
 
-Project Link: [https://github.com/your-username/2mylink](https://github.com/your-username/2mylink)
+Project Link: [https://github.com/angel-gmz/2mylink](https://github.com/angel-gmz/2mylink)
