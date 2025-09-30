@@ -39,6 +39,33 @@ This project is built with a modern and powerful technology stack:
 
 ---
 
+### 📸 Screenshots Gallery
+
+<table align="center">
+  <tr>
+    <td align="center" valign="top">
+      <strong>Landing Page</strong><br><br>
+      <img src="screenshots/landing.png" alt="Landing Page" width="400">
+    </td>
+    <td align="center" valign="top">
+      <strong>Public Profile</strong><br><br>
+      <img src="screenshots/profile.png" alt="Public Profile" width="200">
+    </td>
+  </tr>
+  <tr>
+    <td align="center" valign="top">
+      <strong>Dashboard</strong><br><br>
+      <img src="screenshots/dashboard.png" alt="Dashboard" width="400">
+    </td>
+    <td align="center" valign="top">
+      <strong>Theme Selection</strong><br><br>
+      <img src="screenshots/themes.png" alt="Themes" width="400">
+    </td>
+  </tr>
+</table>
+
+---
+
 ## Getting Started
 
 To get a local copy up and running, follow these simple steps.
