@@ -58,6 +58,9 @@ jobs:
           script: |
             cd ${{ secrets.HOSTINGER_TARGET_DIR }}
             php artisan down
+            mkdir -p storage/framework/{sessions,views,cache}
+            mkdir -p storage/logs
+            chmod -R 775 storage bootstrap/cache
             php artisan migrate --force
             php artisan optimize:clear
             php artisan optimize
