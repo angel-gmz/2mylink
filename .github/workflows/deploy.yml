@@ -1,57 +1,65 @@
-# Nombre del workflow
 name: Deploy to Hostinger
 
-# Se activa en cada push a la rama 'main'
 on:
   push:
     branches:
       - main
 
-# Define los trabajos a ejecutar
 jobs:
   deploy:
-    # Usa una máquina virtual de Ubuntu para ejecutar los pasos
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Clona tu repositorio en la máquina virtual
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. Configura el entorno de PHP
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
 
-      # 3. Instala las dependencias de Laravel
       - name: Install Composer Dependencies
         run: composer install --no-interaction --no-dev --prefer-dist --optimize-autoloader
 
-      # 4. Configura Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      # 5. Instala las dependencias de NPM y compila los archivos
       - name: Install NPM Dependencies and Build
         run: |
           npm install
           npm run build
 
-      # 6. Despliega los archivos usando el Action de FTP
-      - name: Deploy files via FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.4 # <-- Volvemos a este Action
+      # Despliegue de archivos vía Rsync (Más rápido y seguro que FTP)
+      - name: Deploy files via Rsync
+        uses: easingthemes/ssh-deploy@v5.1.0
         with:
-          # Usamos tus secrets, pero asegúrate de que coincidan con la captura
-          server: ${{ secrets.HOSTINGER_HOST }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          ARGS: "-rlgoDzvO --delete"
+          SOURCE: "./"
+          REMOTE_HOST: ${{ secrets.HOSTINGER_HOST }}
+          REMOTE_USER: ${{ secrets.HOSTINGER_USER }}
+          # IMPORTANTE: Define este secreto con la ruta absoluta en tu servidor
+          # Ej: /home/u123456789/domains/tu-dominio.com/public_html
+          TARGET: ${{ secrets.HOSTINGER_TARGET_DIR }}
+          # Excluimos archivos que no queremos sobrescribir o borrar
+          EXCLUDE: "/.git/, /node_modules/, /.env, /storage/"
+
+      # Ejecución de comandos remotos (Migraciones, Caché, Enlaces)
+      - name: Execute Remote Commands
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOSTINGER_HOST }}
           username: ${{ secrets.HOSTINGER_USER }}
-          password: ${{ secrets.HOSTINGER_PASS }}
-          port: ${{ secrets.HOSTINGER_PORT }} # <-- Debe ser 21
-          # No especificamos protocolo, ya que FTP es el default
-          server-dir: ./
-          exclude: |
-            **/.git*
-            **/.git*/**
-            **/node_modules/**
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.HOSTINGER_PORT }} # Generalmente 22
+          # El script asume que HOSTINGER_TARGET_DIR es la ruta raíz del proyecto
+          script: |
+            cd ${{ secrets.HOSTINGER_TARGET_DIR }}
+            php artisan down
+            php artisan migrate --force
+            php artisan optimize:clear
+            php artisan optimize
+            php artisan storage:link
+            php artisan up

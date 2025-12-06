@@ -68,60 +68,128 @@ This project is built with a modern and powerful technology stack:
 
 ## Getting Started
 
-To get a local copy up and running, follow these simple steps.
+To get a local copy up and running with Docker, follow these simple steps.
 
 ### Prerequisites
 
 Make sure you have the following installed on your system:
--   PHP 8.1 or higher
--   Composer
--   Node.js & NPM
--   A database server (e.g., MySQL)
+-   **Docker Desktop** (includes Docker and Docker Compose)
+-   **Git**
 
-### Installation
+### Installation with Docker
 
 1.  **Clone the repository**
     ```sh
-    git clone [https://github.com/your-username/2mylink.git](https://github.com/your-username/2mylink.git)
+    git clone https://github.com/angel-gmz/2mylink.git
     cd 2mylink
     ```
 
-2.  **Install PHP dependencies**
-    ```sh
-    composer install
-    ```
-
-3.  **Install NPM dependencies**
-    ```sh
-    npm install && npm run build
-    ```
-
-4.  **Set up your environment file**
+2.  **Set up your environment file**
     -   Copy the example `.env` file.
     ```sh
     cp .env.example .env
     ```
     -   Generate your application key.
     ```sh
-    php artisan key:generate
+    docker compose run --rm app php artisan key:generate
     ```
 
-5.  **Configure your `.env` file**
-    -   Update the `DB_*` variables with your database credentials.
-    -   Add your Stripe API keys (`STRIPE_KEY`, `STRIPE_SECRET`).
-    -   Add your Google Client ID and Secret for social authentication.
-    -   Set your `APP_URL` to your local development URL.
+3.  **Configure your `.env` file**
+    -   The database configuration is already set for Docker (no changes needed for local development)
+    -   Add your Stripe API keys (`STRIPE_KEY`, `STRIPE_SECRET`)
+    -   Add your Google Client ID and Secret for social authentication
+    -   The `APP_URL` is set to `http://localhost:8080`
 
-6.  **Run database migrations**
+4.  **Build and start the Docker containers**
     ```sh
-    php artisan migrate
+    docker compose up -d
+    ```
+    This will start three containers:
+    - `2mylink_app` - Laravel application (PHP-FPM)
+    - `2mylink_nginx` - Web server
+    - `2mylink_postgres` - PostgreSQL database
+
+5.  **Run database migrations**
+    ```sh
+    docker compose exec app php artisan migrate
+    ```
+    Or use the helper script (Windows):
+    ```sh
+    .\artisan.ps1 migrate
     ```
 
-7.  **Run the development server**
-    ```sh
-    php artisan serve
-    ```
-    Your local instance should now be running at `http://127.0.0.1:8000`.
+6.  **Access your application**
+    
+    Your local instance should now be running at **`http://localhost:8080`**
+
+### Using Artisan Commands
+
+You can run Artisan commands in two ways:
+
+**Option 1: Using Docker Compose directly**
+```sh
+docker compose exec app php artisan [command]
+```
+
+**Option 2: Using helper scripts (Windows)**
+
+PowerShell (recommended):
+```sh
+.\artisan.ps1 [command]
+.\composer.ps1 [command]
+.\npm.ps1 [command]
+```
+
+Command Prompt (cmd):
+```sh
+.\artisan.bat [command]
+.\composer.bat [command]
+.\npm.bat [command]
+```
+
+Examples:
+```sh
+# Run migrations
+.\artisan.ps1 migrate
+
+# Create a new migration
+.\artisan.ps1 make:migration create_example_table
+
+# Run seeders
+.\artisan.ps1 db:seed
+
+# Clear cache
+.\artisan.ps1 cache:clear
+
+# Install a package
+.\composer.ps1 require vendor/package
+
+# Install npm dependencies
+.\npm.ps1 install
+```
+
+### Stopping the Application
+
+```sh
+docker compose down
+```
+
+To stop and remove all data (including database):
+```sh
+docker compose down -v
+```
+
+---
+
+## Traditional Installation (Without Docker)
+
+If you prefer not to use Docker:
+
+1.  **Prerequisites**: PHP 8.2+, Composer, Node.js, PostgreSQL
+2.  **Install dependencies**: `composer install && npm install && npm run build`
+3.  **Configure `.env`**: Update database credentials for your local PostgreSQL
+4.  **Run migrations**: `php artisan migrate`
+5.  **Start server**: `php artisan serve`
 
 ---
 
