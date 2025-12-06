@@ -1,6 +1,6 @@
 import { Head, useForm, usePage } from '@inertiajs/react';
 import { ArrowRight, Check, LoaderCircle } from 'lucide-react';
-import { FormEventHandler, useState, useEffect, useCallback } from 'react';
+import { FormEventHandler, useState, useEffect, useCallback, useMemo } from 'react';
 import { debounce } from 'lodash';
 import axios from 'axios';
 
@@ -23,8 +23,8 @@ export default function Onboarding({ prefilledUsername }: { prefilledUsername?: 
     const [isChecking, setIsChecking] = useState(false);
     const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
 
-    const checkUsername = useCallback(
-        debounce(async (username: string) => {
+    const checkUsername = useMemo(
+        () => debounce(async (username: string) => {
             if (username.length < 3) {
                 setIsAvailable(null);
                 setIsChecking(false);
@@ -33,7 +33,7 @@ export default function Onboarding({ prefilledUsername }: { prefilledUsername?: 
             try {
                 const response = await axios.post('/api/check-username', { username });
                 setIsAvailable(response.data.isAvailable);
-            } catch (error) {
+            } catch {
                 setIsAvailable(false);
             } finally {
                 setIsChecking(false);
@@ -90,8 +90,8 @@ export default function Onboarding({ prefilledUsername }: { prefilledUsername?: 
                         </div>
 
                         <div className="border-t border-slate-700 pt-6">
-                             <Label className="text-lg font-semibold">Add your first link (optional)</Label>
-                             <div className="mt-4 space-y-4">
+                            <Label className="text-lg font-semibold">Add your first link (optional)</Label>
+                            <div className="mt-4 space-y-4">
                                 <div>
                                     <Label htmlFor="link_title">Title</Label>
                                     <Input id="link_title" value={data.link_title} onChange={(e) => setData('link_title', e.target.value)} placeholder="My Website" className="bg-slate-700 border-slate-600" />
@@ -102,7 +102,7 @@ export default function Onboarding({ prefilledUsername }: { prefilledUsername?: 
                                     <Input id="link_url" type="url" value={data.link_url} onChange={(e) => setData('link_url', e.target.value)} placeholder="https://..." className="bg-slate-700 border-slate-600" />
                                     <InputError message={errors.link_url} className="mt-2" />
                                 </div>
-                             </div>
+                            </div>
                         </div>
 
                         <Button type="submit" className="w-full" disabled={processing || isAvailable === false}>

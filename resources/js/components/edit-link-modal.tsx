@@ -37,7 +37,7 @@ export default function EditLinkModal({ link, isOpen, onClose }: EditLinkModalPr
                 url: link.url || '',
             });
         }
-    }, [link]);
+    }, [link, setData]);
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();

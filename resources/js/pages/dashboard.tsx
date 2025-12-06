@@ -35,11 +35,11 @@ interface DashboardUser extends User {
 
 export default function Dashboard({ auth, links: initialLinks }: PageProps<{ links: Item[]; auth: { user: DashboardUser } }>) {
     const [newItemType, setNewItemType] = useState<'link' | 'divider'>('link');
-    
+
     // Inicializa el formulario con los valores por defecto
     const { data, setData, post, processing, errors, reset } = useForm({
         title: '',
-        url: '', 
+        url: '',
         type: 'link' as 'link' | 'divider', // Tipo explícito
     });
 
@@ -66,19 +66,19 @@ export default function Dashboard({ auth, links: initialLinks }: PageProps<{ lin
         e.preventDefault();
 
         // Creamos un objeto con los datos a enviar
-        const dataToSubmit = {
+        // Transform data before submission to only include relevant fields
+        data.transform((data) => ({
             title: data.title,
             type: data.type,
-            // Solo incluye la URL si el tipo es 'link'
-            ...(data.type === 'link' && { url: data.url })
-        };
+            ...(data.type === 'link' && { url: data.url }),
+        }));
 
         // SOLUCIÓN AL ERROR 1: Usar la sintaxis correcta de Inertia
         post(route('links.store'), {
             onSuccess: () => {
                 reset(); // Resetea el formulario completamente
                 setNewItemType('link'); // Vuelve a la pestaña de links
-                
+
                 // Asegurar que el formulario esté completamente limpio
                 setTimeout(() => {
                     setData({
@@ -86,7 +86,7 @@ export default function Dashboard({ auth, links: initialLinks }: PageProps<{ lin
                         url: '',
                         type: 'link',
                     });
-                    
+
                     if (titleInputRef.current) {
                         titleInputRef.current.focus();
                     }
@@ -113,14 +113,14 @@ export default function Dashboard({ auth, links: initialLinks }: PageProps<{ lin
 
     const handleSetNewItemType = (type: 'link' | 'divider') => {
         setNewItemType(type);
-        
+
         // SOLUCIÓN: Resetear completamente el formulario al cambiar de pestaña
         setData({
             title: '',
             url: '',
             type: type,
         });
-        
+
         if (titleInputRef.current) {
             titleInputRef.current.focus();
         }
@@ -171,23 +171,23 @@ export default function Dashboard({ auth, links: initialLinks }: PageProps<{ lin
                 <Card>
                     <CardHeader>
                         <div className="flex items-center border-b">
-                            <button 
-                                onClick={() => handleSetNewItemType('link')} 
+                            <button
+                                onClick={() => handleSetNewItemType('link')}
                                 className={cn(
-                                    'flex items-center gap-2 px-4 py-2 font-semibold', 
-                                    newItemType === 'link' 
-                                        ? 'border-b-2 border-primary text-primary' 
+                                    'flex items-center gap-2 px-4 py-2 font-semibold',
+                                    newItemType === 'link'
+                                        ? 'border-b-2 border-primary text-primary'
                                         : 'text-muted-foreground'
                                 )}
                             >
                                 <Link2 size={16} /> Add Link
                             </button>
-                            <button 
-                                onClick={() => handleSetNewItemType('divider')} 
+                            <button
+                                onClick={() => handleSetNewItemType('divider')}
                                 className={cn(
-                                    'flex items-center gap-2 px-4 py-2 font-semibold', 
-                                    newItemType === 'divider' 
-                                        ? 'border-b-2 border-primary text-primary' 
+                                    'flex items-center gap-2 px-4 py-2 font-semibold',
+                                    newItemType === 'divider'
+                                        ? 'border-b-2 border-primary text-primary'
                                         : 'text-muted-foreground'
                                 )}
                             >
@@ -210,7 +210,7 @@ export default function Dashboard({ auth, links: initialLinks }: PageProps<{ lin
                                 />
                                 {errors.title && <p className="mt-1 text-sm text-red-600">{errors.title}</p>}
                             </div>
-                            
+
                             {/* El campo URL solo se muestra si el tipo de ítem es 'link' */}
                             {newItemType === 'link' && (
                                 <div>

@@ -60,7 +60,7 @@ function PublicProfileThemeSelector({ themes }: { themes: Theme[] }) {
         if (data.theme !== auth.user.theme) {
             patch(route('appearance.update'), { preserveScroll: true });
         }
-    }, [data.theme]);
+    }, [data.theme, auth.user.theme, patch]);
 
     return (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
