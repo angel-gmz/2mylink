@@ -37,7 +37,7 @@ export default function Dashboard({ auth, links: initialLinks }: PageProps<{ lin
     const [newItemType, setNewItemType] = useState<'link' | 'divider'>('link');
 
     // Inicializa el formulario con los valores por defecto
-    const { data, setData, post, processing, errors, reset } = useForm({
+    const { data, setData, post, processing, errors, reset, transform } = useForm({
         title: '',
         url: '',
         type: 'link' as 'link' | 'divider', // Tipo explícito
@@ -67,7 +67,7 @@ export default function Dashboard({ auth, links: initialLinks }: PageProps<{ lin
 
         // Creamos un objeto con los datos a enviar
         // Transform data before submission to only include relevant fields
-        data.transform((data) => ({
+        transform((data) => ({
             title: data.title,
             type: data.type,
             ...(data.type === 'link' && { url: data.url }),
