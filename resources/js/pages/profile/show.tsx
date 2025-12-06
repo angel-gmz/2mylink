@@ -49,6 +49,8 @@ export default function Show({ user, links, seo }: ShowProps) {
     // 1. Desestructuramos todas las propiedades de estilo desde `theme.properties`.
     // 2. Asignamos valores por defecto para asegurar que la página siempre tenga un estilo base
     //    y no se rompa si alguna propiedad no está definida en un tema.
+    // 3. Agregamos verificación defensiva para evitar errores si theme o properties es null
+    const themeProperties = currentTheme?.properties ?? {};
     const {
         gradient_from,
         gradient_to,
@@ -59,7 +61,7 @@ export default function Show({ user, links, seo }: ShowProps) {
         button_style = 'rounded-lg',    // Valor por defecto
         button_shadow = 'shadow-md',    // Valor por defecto
         link_animation,
-    } = currentTheme.properties || {}; // Usamos un objeto vacío como fallback por seguridad.
+    } = themeProperties;
 
     // 3. Determinamos la clase de fondo a aplicar. El gradiente tiene prioridad sobre el color sólido.
     const backgroundClass = gradient_from && gradient_to
