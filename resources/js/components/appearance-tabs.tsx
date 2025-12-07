@@ -7,6 +7,7 @@ import { Appearance, useAppearance } from '@/hooks/use-appearance';
 import { cn } from '@/lib/utils';
 import HeadingSmall from './heading-small';
 import { Separator } from './ui/separator';
+import { useToast } from '@/hooks/use-toast';
 
 // Extend the User type to include the new Cashier prop
 interface AppUser extends BaseUser {
@@ -51,6 +52,7 @@ function PublicProfileThemeSelector({ themes }: { themes: Theme[] }) {
     const { auth } = usePage<PageProps & { auth: { user: AppUser } }>().props;
     // --- CAMBIO CLAVE: Usamos is_subscribed_via_cashier para determinar si el usuario es Premium ---
     const isUserPremium = auth.user.is_subscribed_via_cashier;
+    const { toast } = useToast();
 
     const { data, setData, patch, processing } = useForm({
         theme: auth.user.theme || 'default',
@@ -58,7 +60,15 @@ function PublicProfileThemeSelector({ themes }: { themes: Theme[] }) {
 
     useEffect(() => {
         if (data.theme !== auth.user.theme) {
-            patch(route('appearance.update'), { preserveScroll: true });
+            patch(route('appearance.update'), {
+                preserveScroll: true,
+                onSuccess: () => {
+                    const selectedTheme = themes.find(t => t.name === data.theme);
+                    toast.success('Theme updated', {
+                        description: `Your public profile theme has been changed to ${selectedTheme?.name || data.theme}`,
+                    });
+                },
+            });
         }
     }, [data.theme, auth.user.theme, patch]);
 

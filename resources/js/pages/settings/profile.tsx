@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
+import { useToast } from '@/hooks/use-toast';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -34,6 +35,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
     const { auth } = usePage<PageProps>().props;
     const [preview, setPreview] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const { toast } = useToast();
 
     // 2. Update useForm hook
     const { data, setData, post, errors, processing, recentlySuccessful } = useForm<ProfileForm>({
@@ -48,6 +50,16 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
         // 3. Use post for file uploads
         post(route('profile.update'), {
             preserveScroll: true,
+            onSuccess: () => {
+                toast.success('Profile updated', {
+                    description: 'Your profile information has been saved successfully',
+                });
+            },
+            onError: () => {
+                toast.error('Failed to update profile', {
+                    description: 'Please check your information and try again',
+                });
+            },
         });
     };
 

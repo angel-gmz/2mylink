@@ -15,6 +15,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Check, Copy, Link2, Minus, QrCode } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -35,6 +36,7 @@ interface DashboardUser extends User {
 
 export default function Dashboard({ auth, links: initialLinks }: PageProps<{ links: Item[]; auth: { user: DashboardUser } }>) {
     const [newItemType, setNewItemType] = useState<'link' | 'divider'>('link');
+    const { toast } = useToast();
 
     // Inicializa el formulario con los valores por defecto
     const { data, setData, post, processing, errors, reset, transform } = useForm({
@@ -55,6 +57,9 @@ export default function Dashboard({ auth, links: initialLinks }: PageProps<{ lin
         navigator.clipboard.writeText(publicUrl).then(() => {
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);
+            toast.success('Link copied to clipboard!', {
+                description: 'You can now share your link anywhere',
+            });
         });
     };
 
@@ -79,6 +84,14 @@ export default function Dashboard({ auth, links: initialLinks }: PageProps<{ lin
                 reset(); // Resetea el formulario completamente
                 setNewItemType('link'); // Vuelve a la pestaña de links
 
+                // Mostrar toast de éxito
+                toast.success(
+                    `${data.type === 'link' ? 'Link' : 'Divider'} created successfully!`,
+                    {
+                        description: data.type === 'link' ? `"${data.title}" has been added to your page` : undefined,
+                    }
+                );
+
                 // Asegurar que el formulario esté completamente limpio
                 setTimeout(() => {
                     setData({
@@ -95,6 +108,9 @@ export default function Dashboard({ auth, links: initialLinks }: PageProps<{ lin
             preserveScroll: true,
             onError: (errors: Record<string, string>) => {
                 console.error("Error al enviar el formulario:", errors);
+                toast.error('Failed to create item', {
+                    description: Object.values(errors)[0] || 'Please check your input and try again',
+                });
             }
         });
     };
@@ -107,7 +123,18 @@ export default function Dashboard({ auth, links: initialLinks }: PageProps<{ lin
             const reorderedLinks = arrayMove(links, oldIndex, newIndex);
             setLinks(reorderedLinks);
             const linkIds = reorderedLinks.map((link) => link.id);
-            router.patch(route('links.order.update'), { links: linkIds }, { preserveScroll: true });
+            router.patch(
+                route('links.order.update'),
+                { links: linkIds },
+                {
+                    preserveScroll: true,
+                    onSuccess: () => {
+                        toast.success('Order updated', {
+                            description: 'Your links have been reordered',
+                        });
+                    },
+                }
+            );
         }
     }
 

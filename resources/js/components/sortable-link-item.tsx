@@ -13,6 +13,7 @@ import {
     DropdownMenuTrigger,
 } from './ui/dropdown-menu';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
 
 type LinkWithClicks = LinkType & { clicks: number; type: 'link' | 'divider'; is_active: boolean };
 
@@ -23,6 +24,7 @@ interface SortableLinkItemProps {
 
 export default function SortableLinkItem({ link, onEdit }: SortableLinkItemProps) {
     const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: link.id });
+    const { toast } = useToast();
 
     const style = {
         transform: CSS.Transform.toString(transform),
@@ -30,8 +32,38 @@ export default function SortableLinkItem({ link, onEdit }: SortableLinkItemProps
     };
 
     const handleToggle = () => {
-        router.patch(route('links.toggle', link.id), { is_active: !link.is_active }, {
+        router.patch(
+            route('links.toggle', link.id),
+            { is_active: !link.is_active },
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    toast.success(
+                        link.is_active ? 'Link disabled' : 'Link enabled',
+                        {
+                            description: link.is_active
+                                ? 'This link will not appear on your public page'
+                                : 'This link is now visible on your public page',
+                        }
+                    );
+                },
+            }
+        );
+    };
+
+    const handleDelete = () => {
+        router.delete(route('links.destroy', link.id), {
             preserveScroll: true,
+            onSuccess: () => {
+                toast.success('Item deleted', {
+                    description: `"${link.title}" has been removed`,
+                });
+            },
+            onError: () => {
+                toast.error('Failed to delete item', {
+                    description: 'Please try again',
+                });
+            },
         });
     };
 
@@ -63,7 +95,7 @@ export default function SortableLinkItem({ link, onEdit }: SortableLinkItemProps
                 </div>
                 <div className="ml-4 flex flex-shrink-0 items-center gap-4">
                     {link.type === 'link' && (
-                         <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
                             <BarChart2 size={16} />
                             <span>{link.clicks}</span>
                         </div>
@@ -94,11 +126,12 @@ export default function SortableLinkItem({ link, onEdit }: SortableLinkItemProps
                                 )}
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem asChild className="text-red-600 focus:text-red-600">
-                                <Link href={route('links.destroy', link.id)} method="delete" as="button" className="w-full">
-                                    <Trash2 className="mr-2 h-4 w-4" />
-                                    <span>Delete</span>
-                                </Link>
+                            <DropdownMenuItem
+                                onSelect={handleDelete}
+                                className="text-red-600 focus:text-red-600"
+                            >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                <span>Delete</span>
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
