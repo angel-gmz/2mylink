@@ -1,4 +1,5 @@
 # Build stage for Node.js dependencies
+# Forzando actualizacion
 FROM node:20-alpine AS node-builder
 
 WORKDIR /app
