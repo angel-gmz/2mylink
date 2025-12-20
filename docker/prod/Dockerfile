@@ -53,6 +53,9 @@ COPY composer.json composer.lock ./
 RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
 
 # Copy application files
+# Copy application files
+# Cache bust to ensure new config files are picked up
+ENV DL_CACHE_BUST=20251220-1
 COPY . .
 
 # Copy built assets from node-builder
