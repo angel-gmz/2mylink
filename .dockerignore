@@ -1,5 +1,5 @@
 # Ignore Docker-related files that shouldn't be in the image
-docker/
+#docker/
 *.bat
 Dockerfile
 docker-compose.yml
