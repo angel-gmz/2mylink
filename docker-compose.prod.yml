@@ -22,6 +22,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    volumes:
+      - app_storage_prod:/var/www/html/storage
     networks:
       - 2mylink_prod_net
 
@@ -45,6 +47,8 @@ services:
 
 volumes:
   postgres_data_prod:
+    driver: local
+  app_storage_prod:
     driver: local
 
 networks:

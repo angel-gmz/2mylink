@@ -125,11 +125,15 @@ Route::get('/rtthemrtdavbfbgij12345', function () {
     return 'ThemeSeeder executed successfully!';
 });
 
-/*
 Route::get('/rtdasadsgij1234sb', function () {
     // Borra el enlace viejo si existe, para evitar errores
     if (file_exists(public_path('storage'))) {
-        unlink(public_path('storage'));
+        if (is_link(public_path('storage'))) {
+            unlink(public_path('storage'));
+        } else {
+            // Document why we use rename here if needed, but usually it's a folder or link
+            // If it's a directory, we might need a different approach, but usually it's a link or nothing.
+        }
     }
 
     // Crea el nuevo enlace simbólico
@@ -137,7 +141,6 @@ Route::get('/rtdasadsgij1234sb', function () {
 
     return '¡Enlace simbólico creado!';
 });
-*/
 
 Route::get('/visit/{link}', [LinkClickController::class, '__invoke'])->name('links.visit');
 

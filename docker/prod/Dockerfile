@@ -76,6 +76,9 @@ RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html/storage \
     && chmod -R 755 /var/www/html/bootstrap/cache
 
+# Create storage link
+RUN php artisan storage:link
+
 # Expose port 80
 EXPOSE 80
 
