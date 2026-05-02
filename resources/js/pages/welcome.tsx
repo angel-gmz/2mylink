@@ -22,7 +22,7 @@ const PhoneMockup = () => (
                 <div className="size-24 rounded-full bg-teal-500 flex items-center justify-center">
                     <span className="text-4xl font-bold text-slate-900">A</span>
                 </div>
-                <h2 className="text-xl font-bold text-white">@angeldev</h2>
+                <h2 className="text-xl font-bold text-white">@Angeldev</h2>
                 <p className="text-sm text-slate-400">Welcome to my digital universe!</p>
                 <div className="w-full space-y-3 pt-4">
                     <MockupLink icon={<Globe size={20} />} text="My Portfolio" />
@@ -136,7 +136,7 @@ export default function Welcome() {
                         </div>
                     </div>
                 </main>
-                
+
                 {/* Features Section */}
                 <section className="py-20 bg-slate-950/50">
                     <div className="container mx-auto px-6 text-center">
