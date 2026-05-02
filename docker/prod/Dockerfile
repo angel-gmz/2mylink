@@ -76,11 +76,15 @@ RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html/storage \
     && chmod -R 755 /var/www/html/bootstrap/cache
 
-# Create storage link
-RUN php artisan storage:link
+# Copy and prepare entrypoint
+COPY docker/prod/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 # Expose port 80
 EXPOSE 80
+
+# Entrypoint ensures storage dirs + symlink exist at runtime
+ENTRYPOINT ["/entrypoint.sh"]
 
 # Start Supervisor
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
